@@ -642,6 +642,7 @@ Offene Punkte / Wunschliste:
   Vielleicht macht eine eigene Tabelle sinn.
   Vielleicht Links zu Wikipedia setzen
 
+- Wofür ist admin.php gut?
 
 Unwichtige Punkte:
 
