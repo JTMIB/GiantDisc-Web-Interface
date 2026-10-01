@@ -1,0 +1,34 @@
+#!/bin/sh
+
+##################################################
+#
+# GiantDisc mp3 Jukebox
+# 
+# © 2000-2002, Rolf Brugger
+#
+##################################################
+
+cd /home/music/database
+
+echo "creating tables"
+mysql < createtables.mysql
+
+#echo "reading tracks"
+#mysql < readtracks.mysql
+
+#echo "reading albums"
+#mysql < readalbums.mysql
+
+echo "reading genres"
+mysql < readgenres.mysql
+
+echo "reading languages"
+mysql < readlanguages.mysql
+
+echo "reading musictypes"
+mysql < readmusictypes.mysql
+
+echo "reading sources"
+mysql < readsources.mysql
+
+#

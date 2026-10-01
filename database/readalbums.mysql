@@ -1,0 +1,4 @@
+use GiantDisc;
+load data local infile '/home/music/tmp/albums.txt'
+  into table album;
+

@@ -1,0 +1,2 @@
+mysql -uroot GiantDisc < create-tables.mysql
+

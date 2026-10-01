@@ -1,0 +1,7 @@
+/* Creates DB and opens it to any user */
+/* Run this mysql macro as root!  */
+
+use GiantDisc;
+grant all privileges on GiantDisc.* to wwwrun@'localhost' with grant option;
+
+

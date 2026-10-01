@@ -1,0 +1,4 @@
+use GiantDisc;
+load data local infile 'sources.txt'
+  into table source;
+

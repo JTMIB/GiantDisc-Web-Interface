@@ -1,0 +1,10 @@
+wwwrun    8258  8257  0 18:00 ?        00:00:00 sh -c ps -ef | grep cdparanoia > /srv/www/htdocs/music/00/rip.txt
+wwwrun    8261  8257  0 18:00 ?        00:00:00 sh -c ps -ef | grep cdda2wav >> /srv/www/htdocs/music/00/rip.txt
+wwwrun    8264  8257  0 18:00 ?        00:00:00 sh -c ps -ef | grep lame >> /srv/www/htdocs/music/00/rip.txt
+wwwrun    8267  8257  0 18:00 ?        00:00:00 sh -c ps -ef | grep oggenc >> /srv/www/htdocs/music/00/rip.txt
+wwwrun    8270  8257  0 18:00 ?        00:00:00 sh -c ps -ef | grep flac >> /srv/www/htdocs/music/00/rip.txt
+wwwrun    8274  8257  0 18:00 ?        00:00:00 sh -c ps -ef | grep cdparanoia >> /srv/www/htdocs/music/00/rip.txt
+wwwrun    8277  8257  0 18:00 ?        00:00:00 sh -c ps -ef | grep cdda2wav >> /srv/www/htdocs/music/00/rip.txt
+wwwrun    8280  8257  0 18:00 ?        00:00:00 sh -c ps -ef | grep lame >> /srv/www/htdocs/music/00/rip.txt
+wwwrun    8283  8257  0 18:00 ?        00:00:00 sh -c ps -ef | grep oggenc >> /srv/www/htdocs/music/00/rip.txt
+wwwrun    8286  8257  0 18:00 ?        00:00:00 sh -c ps -ef | grep flac >> /srv/www/htdocs/music/00/rip.txt

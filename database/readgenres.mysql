@@ -1,0 +1,5 @@
+use GiantDisc;
+#load data local infile 'genres.txt'
+load data local infile 'genre_jt.txt'
+  into table genre;
+

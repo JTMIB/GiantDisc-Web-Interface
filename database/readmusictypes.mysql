@@ -1,0 +1,4 @@
+use GiantDisc;
+load data local infile 'musictypes.txt'
+  into table musictype;
+
