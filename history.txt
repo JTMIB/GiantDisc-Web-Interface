@@ -1,0 +1,660 @@
+08.05.2005
+Nachdem der Prototyp für Record über die Browseroberfläche funktioniert,
+versuche ich jetzt diese in die Version 1.33 von Rolf Brugger zu integrieren.
+Immerhin bastle ich jetzt seit April 2004 daran. Mit vielen ungewollten Unterbrechungen,
+die sich eben in so einem Familienzusammenleben ergeben. (Da muss man eben ständig die
+Prioritäten anpassen. - Pupertierende Kids sind wirklich sehr anstrengend.)
+
+
+- In gdweb.php das Record Menü hinzugefügt. Zusätzlich das Logo eingefügt.
+- In Datenbank mysql muss bei SuSE anstatt dem Benutzer "apache"
+  der Benutzer "wwwrun" eingetragen werden.
+
+10.05.2005
+Scripte intergrieren:
+- read_inbox_album.php
+- control_web.inc
+- german.inc
+- english.inc
+
+- function write_albumlink auskomentiert!? in control_web.inc
+
+14.05.2005
+- Funktionen vom 10.05.2005 getestet und korrigiert.
+- Um die Spalte genre in Album erweitert.
+- In opt-consistency-album.php den Funktionsaufruf korrigiert: print_header ("Options", "");
+- Das Gleiche bei gdgenretrans.php
+Scripte integrieren:
+- read_inbox_track.php
+- gddetails.php fehlt jetzt plötzlich!?
+- read_from_cd.php
+
+15.05.2005
+- gdweb.css erweitert
+- read_from_cd.php korrigieren
+- die Funktion print_header um drei Parameter erweitert
+
+16.05.2005
+
+- corrpt.php hinzufügen
+- read_from_cd.php korrigieren
+	- updaten einer CD funktioniert
+	- hinzufügen einer CD funktioniert
+
+18.05.2005
+- Test der neuen Browser-Oberfläche auf meinem Server im Keller,
+  also nicht die GiantDisc mit Palm-Steuerung.
+
+19.05.2005
+print_header ergänzen in:
+- gdeditalbum.php
+- gdshowalbum.php
+Ein bischen rumstöbern. Was gibt es im Detail neues?
+Was gefällt mir? Was sollte verbessert werden?
+Packet schnüren und hochladen. (noch auf der Domäne von schwarz-weiss-rt.de)
+
+01.05.2006
+- Neuer GDD (1.40) installiert und ein paar Fehlerchen beseitigt.
+- conditon gegen quality tauschen
+- composer ins Script hinzufügen (record from CD)
+- tracks_temp um moreinfo ergänzen
+
+02.05.2006
+- Fehler in Schleife (Korrigieren)/Read from CD beseitigt
+
+18.05.2006
+- read_from_cd bitrate auswerten
+
+09.08.2006
+- Reihenfolge geändert
+	neue CD in Datenbank importieren
+	neue CD einlesen (läuft sowieso als Shell-Script)
+	Wird jetzt der Browser geschlossen, werden nur die Spiellängen nicht angepasst.
+	Das kann man dann später unter Optionen tun.
+
+12.08.2006
+- neue Symbole bei Aufnahme von CD eingebaut. Jetzt sieht es etwas ansprechender aus.
+- Erster Versuche mit einer Prüfroutine. Das Grundgerüst habe ich mir
+	bei "Phil's Web client" abgekupfert.
+
+13.08.2006
+- Fehler in Programmablauf korrigiert
+- Bei einer leeren Datenbank wurden keine Sprachen zur Auswahl angezeigt.
+	print_lang_options angepasst.
+- Suchanfrage bei freedb.org per klick auf das Logo (ist abschaltbar)
+
+
+14.08.2006
+- Zeit zum hochladen. (GDCI_0_1.tar.gz)
+--------------------------------------------------------------------
+
+19.08.2006
+- Prüfroutine in die index.php integriert
+- erste Vorbereitungen für die Intergration von OGG
+
+27.08.2006
+- Aus /inbox/album können jetzt OGG-Dateien importiert werden
+- Aus /inbox können jetzt OGG-Dateien importiert werden
+- Es wird geprüft, ob die Dateien gelesen werden können.
+
+01.09.2006
+- einlesen von CD für OGG vorbereiten.
+
+09.09.2006
+- Einlesen von OGG ist jetzt realisiert.
+
+10.09.2006
+- importieren von einzelnen flac-Dateien ist jetzt realisiert.
+- importieren von flac-Alben ist jetzt realisiert
+
+13.09.2006
+- prüfen ob schon eine Aufnahme läuft
+
+15.09.2006
+- Zeit zum hochladen. (GDCI_0_2.tar.gz)
+--------------------------------------------------------------------
+
+15.09.2006
+- diverser Aufräumarbeiten
+	- gdweb.php gibt es jetzt nicht mehr.
+
+18.09.2006
+- write_alphabet -> bei den Zahlen werden jetzt nur die angezeigt, wo auch etwas vorhanden ist.
+
+20.09.2006
+- Experimente mit Playlisten
+
+21.09.2006
+- Fehler in gdtrid2mp3.php (include) beseitigt
+  gdweb.php wurde ja in control_web.inc integriert und existiert somit nicht mehr.
+
+
+01.10.2006
+- Playlist mit Winamp abspielen
+  (Das ganze ist aber noch etwas unelegant gelöst
+   - findet das Verzeichnis noch nicht von alleine)
+
+03.10.2006
+- p_listen -> Funktion listet Titel der Playliste auf
+  einzelne Titel können angehört werden. (Das ganze ist aber genauso unelegant gelöst)
+
+04.10.2006
+- Datei listen.php wurde jetzt in browse.php realisiert.
+  Auflisten der einzelnen Tracks einer Playliste.
+
+07.10.2006
+- Super Sache: die freedb.org-Abfrage funktioniert nicht mehr. Sch....
+- Dafür ist jetzt das Erstellen von Spielelisten fertig.
+
+08.10.2006
+- Zeit zum hochladen. (GDCI_0_3a.tar.gz)
+--------------------------------------------------------------------
+
+12.10.2006
+- ID-Tag in MP3 und OGG einfügen ist jetzt realisiert
+  $id3tag = "yes"
+
+05.11.2006
+- es hatte sich ein Fehler beim Schreiben von MP3 eingeschlichen
+  jetzt wird der Parameter "mp3" berücksichtigt
+
+
+21.02.2007
+- freedb.org-Abfrage funktioniert wieder
+- init.php angelegt (Initialisierungs-Seite)
+	Später soll darüber die Sprache ausgewÃ¤hlt werden.
+
+07.03.2007
+- Zeit zum hochladen. (GDCI_0_3b.tar.gz)
+--------------------------------------------------------------------
+04.05.2007
+- unter Browse den Menüpunkt "Singel Tracks" eingeführt
+  es werden alle Tracks angezeigt, die nicht zu einem Album gehören
+  Es ist etwas umständlich realisiert. Ich habe momentan keine Lösung für einen einfachen Select.
+--------------------------------------------------------------------
+
+21.10.2007
+- unter Browse den Menüpunkt "all Albums" eingeführt
+  es weden alle Alben angezeigt.
+--------------------------------------------------------------------
+03.11.2007
+- in Browse "This Album" eingefuehrt.
+Dadurch wird das ausgewaehlte Album schoener angezeigt. (Cover)
+Bisher steht es nur bei "All Albums" zur Verfügung.
+--------------------------------------------------------------------
+04.01.2009
+- tracktype eingefuehrt
+--------------------------------------------------------------------
+09.01.2009
+- Sprung zur Liste bei Auswahl eines Albums
+11.01.2009
+- Cover zur Liste anzeigen
+--------------------------------------------------------------------
+04.11.2009
+- upload von track und album eingeführt
+--------------------------------------------------------------------
+Juli 2011
+- Pruefroutine für register_globals und register_long_arrays
+--------------------------------------------------------------------
+September und Oktober 2011
+- nach Aufnahme ertönt ein akustisches Signal
+- Zurück-Knopf nach dem Einfügen in eine Playliste
+- diverse Warning beseitigt (aber noch nicht alle)
+--------------------------------------------------------------------
+6. November 2011
+- GDCI_0_4_1.zip hochladen
+--------------------------------------------------------------------
+ab dem 10. November 2011
+habe ich begonnen, verschiedene Anpassungen durchzuführen, damit die Scripte UTF-8 geeignet sind.
+- bearbeiten von Musikstücken funktioniert.
+- gleich noch ein "zurück"-Knopf eingebaut.
+--------------------------------------------------------------------
+23. November 2011
+- Umschaltmöglichkeit zwischen UTF-8 und latin
+- 320kbs bei MP3 sind jetzt möglich
+- FLAC-Dateien werden jetzt mit TAG versehen
+--------------------------------------------------------------------
+26. November 2011
+- Apostroph (') in "&#39;" bei lesen von CD und bei der Suche geändert
+--------------------------------------------------------------------
+18. Januar 2012
+- In Playlisten das Löschen von einzelnen Titeln ermöglichen
+- mit Lücke in der Reihenfolge schliessen
+--------------------------------------------------------------------
+27. Januar 2012
+- einzelne Stücke in der Playlist noch oben und unten schieben
+--------------------------------------------------------------------
+19. Februar 2012
+- Knopf Lyric bei aufgelisteten Musikstücken anzeigen, wenn eine Lyric hinterlegt ist.
+- Ein Klick auf dieses Logo und es öffnet sich ein PopUp mit der Lyric.
+- Felder wirklich auf NULL setzen. Der Inhalt reicht nicht!
+- Mir ist aufgefallen, dass beim produktiven System die Lyrics nach einem Update
+  von gddetails.php gelöscht waren. Also habe ich die Methode von get auf post geändert.
+  Versuche auf dem Testsystem verlaufen erfolgreich.
+--------------------------------------------------------------------
+20. Februar 2012
+- Import von Album per upload
+    - Felder auf NULL setzen
+    - Korrektur von Rating
+    - Spieledauer feststellen
+--------------------------------------------------------------------
+Juli 2012
+- Bekanntschaft mit getID3() gemacht. Erste Testscripts sind vielversprechend. Das Lesen und Schreiben von TAG oder Comment
+  funktioniert bei FLAC, OGG und MP3. Es wären also keine zusaetzlichen Programme nötig und die Laufzeiten würden sich verringern.
+Noch ein paar Links:
+	http://getid3.org/
+	http://getid3.sourceforge.net/
+	http://www.phpgangsta.de/moglichkeiten-id3-informationen-aus-mp3s-auszulesen
+--------------------------------------------------------------------
+23. August 2012
+	PHP-Version abfragen - mindestens 5.0.5
+	Zeiten mit getID3() auslesen und in Datenbank eintragen - playtime.php
+--------------------------------------------------------------------
+19. Septempber 2012
+	ID-Tag und Comment mit getID3 schreiben
+	mp3info und ogginfo sind somit überflüssig
+	Pruefroutine in index.php und init.php eingebaut
+--------------------------------------------------------------------
+23. Januar 2013
+	Hochladen von Cover eingebaut.
+		- cover.php
+		- cover_upload.php
+	Zusätzlich wird ein Mini-Bild mit 80 Pixel Höhe errechnet.
+--------------------------------------------------------------------
+20. Mai 2013
+	Anzeigen von Mini-Bild bei Alben
+	Bei alle Alben Mini-Bilder mit 80 Pixel Höhe errechnen
+--------------------------------------------------------------------
+03.12.2013
+  Wenn das Einlesen einer CD fertig ist, wird eine Sounddatei abgespielt.
+  Das funktioniert jetzt mit IE und Firefox.
+  Hier eine Anleitung: http://www.youtube.com/watch?v=2k3KW9zsNF8
+--------------------------------------------------------------------
+22. Juli 2014
+  Scripte und Anleitung so weit angepasst, dass es auf SuSE 12.1 läuft. 
+--------------------------------------------------------------------
+5. November 2014
+  Auf SuSE 12.3 getestet. So wie es aussieht ist alles OK.
+  Es wird Zeit diese Version zu veröffentlichen.
+--------------------------------------------------------------------
+9.11.2014
+  lyric.php ergänzen mit DB-connect. Sonst tut es mit SuSE 12.3 nicht
+10.11.2014
+  Auf der Initialisierungsseite:
+	- upload_max_filesize
+	- post_max_size
+	- max_execution_time
+  prüfen.
+--------------------------------------------------------------------
+22.11.2014
+  So wie es aussieht treten erst im Live-Betrieb Fehler auf.
+  Also beseitigen!
+  gdtrupd.php
+  gddetails.php
+  cont_gdsel.php
+--------------------------------------------------------------------
+26.11.2014
+  Über Options/Bearbeite Album
+  die Möglichkeit geschaffen, ein vorhandenes Cover zu löschen, um ein
+  neues Cover hochzuladen.
+--------------------------------------------------------------------
+27.11.2014
+  Up-Link eingebau
+--------------------------------------------------------------------
+28.12.2014
+  Link zu tracktype.org korrigiert.
+  tracktype.org scheint momentan nicht zu funktionieren  
+--------------------------------------------------------------------
+22.02.2015
+  Beginn mit der Überarbeitung der Scripte
+  Es soll alles mit register_globals=OFF funktionieren
+  Ab SuSE 12.3 habe ich keine Wahl mehr.
+  22.02.2015 -> browse.php
+  22.02.2015 -> lyric.php
+  24.02.2015 -> index.php
+  24.02.2015 -> init.php
+  25.02.2015 -> gdtrid2mp3.php
+  25.02.2015 -> cover.php
+  25.02.2015 -> cover_delete.php
+  25.02.2015 -> cover_upload.php
+  25.02.2015 -> delete.php
+  25.02.2015 -> appendpl.php
+  25.02.2015 -> newpl.php
+  25.02.2015 -> cont_gdsel.php
+  25.02.2015 -> gddetails.php
+                gdgenretrans.php deaktiviert
+                gdshowalbum.php wird nicht benötigt
+                gdeditalbum.php wird nicht benötigt
+  26.02.2015 -> opt-consistency-album.php
+  05.03.2015 -> file_upload.php
+  06.03.2015 -> corrpt.php
+  06.03.2015 -> playtime.php
+  06.03.2015 -> nach file_uplaod.php wir die Playtime korrigiert
+  18.03.2015 -> album_upload.php
+  18.03.2015 -> music.pl laeuft ohne Aenderung. Dafuer muss die Anleitung wegen eject ergaenzt werden.
+  18.03.2015 -> Aufruf von tracktype.org und freedb.org funktioniert.
+  25.03.2015 -> read_from_cd.php - exec("/srv/www/htdocs/music/00/ripit.sh > /dev/null &");
+                Das Script wird nicht mehr ueber music.pl gestartet.
+  04.04.2015 -> opt-displayset.php deaktiviert
+                Es werden zwar Cookies gesetzt, diese haben aber in browse.php keine Wirkung.
+  04.04.2015 -> Erfolgreicher Test auf meinem älteren Testsystem: sieht gut aus.
+                Zeit zum Hochladen der Version 0.4.5
+--------------------------------------------------------------------
+  21.04.2015    Ab jetzt ist es möglich die Titel eines Albums zu bearbeiten                             
+--------------------------------------------------------------------
+  22.04.2015    In Alle Alben kann jetzt nach Source gefiltert werden (CD, Vinyl, Tape, ...)
+  23.04.2015    Fehler korrigiert
+                in cover.php im Link zum Bearbeiten der Tracks $artist entfernt.
+--------------------------------------------------------------------   
+  01.05.2015    Anzeige von Single Tracks beschleunigt
+--------------------------------------------------------------------
+  25.05.2015    Beginn: Album als Favorit markieren/bewerten
+  25.05.2015    Tabelle album_fav erstellt
+  21.05.2015    in browse.php - alle Alben - werden jetzt die Favoriten angezeigt
+  05.06.2015    cont_gdsel.php Abfrageformulierung geändert. - Fehler beseitigt.
+  13.06.2015    Bewertungen koennen jetzt gesetzt und geaendert werden
+  15.06.2015    Bewertungen koennen jetzt auch geloescht werden.
+  25.06.2015    Ausgabe nach Sourcen und Favoriten. temporäre Tabelle fav_temp
+--------------------------------------------------------------------
+  05.07.2015    "'" ist jetzt im Albumnamen möglich
+--------------------------------------------------------------------
+  14.06.2016    Idee einer Abspielfunktion auf dem Server. Somit wäre es auch möglich den GiantDisc-Server
+                per Tablet zu steuern. Die Idee besteht darin mpg123 oder mplayer über bash-Befehle zu verwenden.
+                Es gibt ja schon bereits eine play.php die ich wohl vor langer Zeit mal angelegt habe.
+                Geänderte Dateien: play.php, browse.php, control_web.inc
+                Bis jetzt ist nur die Play-Funktion realiesiert. Kein Weiter und kein Stop.
+--------------------------------------------------------------------
+  19.01.2018    Migration auf einen ESPRIMO Q5030
+                Nach einigen Versuchen kristallisiert sich heraus, das es mit OpenSuse 13.2 funktioniert.
+                Hoehere Versionen booten nicht, bei aelteren Versionen laesst sich kein Mediaplayer funtionsfaehig installieren.
+                Vor Allem der geliebte VLC-Player nicht. So wie ich das verstehe hat das rein rechtliche Gründe.
+                Dafür funktioniert Amarok tadellos. Zumindest bei MP3-Dateien. OGG- und FLAC-Dateien muss ich noch testen.
+                FLAC-Dateien klingen furchtbar! So eine Sch...
+                music.pl muss in der ersten Zeile ein -w erhalten
+                Auswahl von /dev/sr0 oder /dev/sr1 eingebaut.
+                cdparanoia um diesen Parameter erweitert
+                Tests diese Installation zu clonen sehen gut aus. Ziel ist dann eine SSD für mehr Schwubtizitaet.
+  - Derzeit funktioniert nur das Einlesen über ein externes CD_Laufwerk. Keine Ahnung, warum das interen nicht angesprochen werden kann.                
+  - Derzeit gibt es das Problem, dass beim Uplaod vom Cover der Datenbankeintrag nicht erfolgt.
+                Da musste ich die Verzögerung um 3 Sekunden erhöhen. Das sollte im grünen Bereich sein.
+  - Die Abspielfunktion auf dem Server könnte mit mpg123 oder mplayer erfolgen. Muss ich noch testen.           
+--------------------------------------------------------------------
+ 22.01.2019     Bei der Abspielfunktion "play.php" wird nur in der ersten Zeile die Lyric angezeigt.
+                Problem ist jetzt beseitigt. Somit ist die Abspielfunktion mit mplayer für Alben gegeben.
+                Spielelisten folgen später.
+--------------------------------------------------------------------
+ 23.01.2020	Das Grundgerüst zum Abspielen der Spielelisten steht ja schon eine Weile.
+		        Gerade bin ich dabei mir einen Überblick zu verschaffen, um das Script endlich
+		        zum Ende zu bringen.
+ 28.01.2020 Das Script zum Abspielen von Spielelisten ist fertig. Es funktioniert.
+ 30.01.2020 Einen Schönheitsfehler beseitigt. Der Aktivitätspfeil blieb nach Stop stehen.
+--------------------------------------------------------------------
+ 23.02.2020 freedb.org schließt zum 31. März 2020
+            Das ist wirklich schade. Somit habe ich keine frei zugängliche Datenbank mehr.
+            Urgent notice
+            freedb.org and its services will be shut down on March 31st of 2020.
+ 09.03.2020 Möglicherweise gibt es eine Alternative: https://musicbrainz.org/search
+	    https://www.bitblokes.de/freedb-org-macht-dicht-die-freie-datenbank-ab-31-maerz-2020-eingestellt/
+	    Das muss ich mir mal ansehen und testen.
+ 24.06.2020 Noch ein Link
+      http://www.gnudb.org/search.php
+            
+--------------------------------------------------------------------
+ 10.07.2020 Schönheitsfehler im Abspielen von Spielelisten beseitigt.
+            Da gabe es ein Problem mit dem Vergleichen von Strings.
+            Playlisten durften keine Leerzeichen haben!
+            newpl.php geändert
+            Beim Hochladen einzelner Dateien wird eine leer Lyric angelegt!
+            Auf NULL gesetzt
+
+--------------------------------------------------------------------
+24.09.2020  gnudb.org zum Suchen eingebaut. freedb und tracktype funktionieren ja nicht mehr.
+
+--------------------------------------------------------------------
+22.11.2021  in der Datei read_from_cd.php das Schreiben von id3v2 aktiviert.
+
+--------------------------------------------------------------------
+27.06.2022  in der Datei file_upload.php eine kleinen Fehler bei Auswahlfeld "Source" beseitigt.
+
+--------------------------------------------------------------------
+05.02.2024  Scriptanpassungen durchgeführt. Es ist jetzt möglich die Scripte auf Ubuntu 20.04 laufen zu lassen.
+            Die ersten Tests sind zumindest vielversprechend.
+            Lyric editieren ist noch fehlerhaft.
+--------------------------------------------------------------------
+07.02.2024  Fehler beim editieren von Lyric sind beseitigt.
+--------------------------------------------------------------------
+17.02.2024  music.pl angepasst, damit die Musikstückläng von OPUS-Dateien in die Datenbank eingetragen werden kann.
+            In corrpt.php ist jetzt eine Weiche eingebaut. Bei FLAC wird das Modul getid3 verwendet.
+--------------------------------------------------------------------
+19.02.2024  Ich habe sohon lange cdda2wav nicht mehr verwendet.
+            Jetzt sollte man diese Tool verwenden können.
+            Installiert wird es mit:
+            apt install icedax
+            Wichtig ist, dass das tool auf das Laufwerk zu greifen darf.
+            Im schlimmsten Fall hilft ein chmod 777 /dev/sr0
+--------------------------------------------------------------------
+22.02.2024  Mir ist aufgefallen, dass es ein Problem gibt, wenn ich die Datenbank
+            befülle aber die Bilder der Cover vergessen habe. Die Fehler sind jetzt beseitig.
+--------------------------------------------------------------------
+25.02.2024  Ab jetzt werden die Favoriten-Sternchen bei den Alben angezeigt.
+            Also nicht nur bei "Alle Alben".
+            Bei der Gelegenheit habe ich auch die Möglichkeit zum Editieren der Alben geschaffen.
+            Dadurch ist es einfach möglich, den Alben Sternchen zu vergeben.
+            
+            Da ich gerade so im Flow bin, bin ich noch das Thema Abspiellisten angegangen
+            und habe verschiedene Fehler beseitigt.
+--------------------------------------------------------------------
+15.03.2024  Inzwischen gibt es eine Seite für Einstellungen/Setting
+            Dort kann die Sprache deutsch/englisch und das bevorzugte
+            Dateiformat gewählt werden.
+--------------------------------------------------------------------
+22.03.2024  Die Einstellung sind jetzt etwas erweitert.
+            Ab jetzt können für MP3, OGG, FLAC und OPUS die default-Werte gesetzt werden.
+            Es ist also nicht mehr hart codiert.
+            Und weil es so schön ist habe ich auch noch den Browser-Zeichensatz wählbar eingestellt.
+            So wie es aussieht, gibt es nicht mehr so viele Punkte auf der Wunschliste.
+            Das Thema mit der nicht eindeutigen Disc-ID könnte recht anspruchsvoll werden.
+--------------------------------------------------------------------
+29.03.2024  Jetzt habe ich die Anleitung überprüft und bereite den Upload auf meine Webseite vor.
+
+--------------------------------------------------------------------
+10.04.2024  Ein paar Anpassungen durchgeführt, damit die Scripte auf der Synology laufen.
+            Es hat wohl Probleme mit dem weiterreichen von Variablen gegeben.
+            Upload der Version GD_Web_Interface_1_1.zip
+--------------------------------------------------------------------
+11.04.2024  Nachdem ich gestern das Problem mit den Covern beseitigt hatte,
+            ist mir heute aufgefallen, dass auf der Synology die
+            einzelnen Tracks nicht heruntergeladen/abgespielt werden können.
+            Problem ist beseitig und die ZIP erneut hochgeladen.  
+--------------------------------------------------------------------
+15.04.2024  Wie ich feststellen muss, funktioniert die Suchfunktion nicht mehr.
+            Ich bekomme zwar die Anzahl an Treffer aber keine Ergebnisse.
+            
+            Auf der Synology funktioniert zwar der Upload einer einzelnen Datei
+            aber die Korrekutur der Spielezeit in die Datenbank schlägt fehl.
+            Der Verweis nach /cgi-bin/music.pl scheint falsch zu sein.
+            Perl läuft nicht!
+            
+            OK, das Problem mit der Suchfunktion ist beseitigt.            
+--------------------------------------------------------------------
+31.05.2024  Die corrpt.php angepasst, damit bei nicht vorhandenem
+            CD-Laufwerk ($read_CD = "no";) die PHP-Scripte von getid3
+            verwendet werden. Dadurch ist es möglich dieses Webinterface
+            auf einer Synology zu betreiben. - Test steht noch aus.
+            Der einzige Wermutstropfen ist, dass hochgeladene OPUS-Dateien
+            in der Datenbank eine Spielelänge von 0 haben.
+--------------------------------------------------------------------
+05.06.2024  In setting.php die Möglichkeit geschaffen, die Verwendung
+            eines CD-Laufwerks ein- und auszuschalten
+--------------------------------------------------------------------
+06.06.2024  In setting.php die Möglichkeit geschaffen zwischen
+            cdrom, sr0 und sr1 zu wählen. Bei Ungereimtheiten
+            bitte das cdTest.sh in Verzeichnis test verwenden.
+            Im Zweifelsfall muss die setting.php erweitert werden.
+            Ich habe die derzeit geläufigsten Gerät aufgelistet.
+            Historisch gesehen gibt es eine viel größere Auswahl.
+            
+            In der Datei read_from_cd.php gibt es noch eine Zeile mit einem absoluten Pfad
+            wie in der Zeile 1247
+            exec("/var/www/html/music/00/ripit.sh > /dev/null &");
+            Ich habe mehrere Zeilen entdeckt und mit Variablen versehen.
+--------------------------------------------------------------------
+09.06.2024  In cont_gdsel.php das Lautsprechersymbol dirket mit der Audiodatei verknüpft.
+            Die Auswahlradiobuttons entfernt.
+            Die Sprachdateien angepasst.
+--------------------------------------------------------------------
+10.06.2024  In browse.php in "Alle Alben" die Möglichkeit geschaffen,
+            die erste und letzt Seite aufzurufen.
+            Zur nächsten oder vorigen Seite zu springen ist auch realisiert.
+            Vorwärts und Rückwärts	
+--------------------------------------------------------------------
+25.10.2024  Beim Menü Album hochladen war es bisher nur möglich MP3 hochzuladen.
+            Bei anderen Dateintypen wurden diese fälschlicherweise als MP3 abgelegt,
+            was zu Fehlern in der Datei corrpt.php gefürht hat. - Die Abspielzeit konnte nicht erfasst werden.
+            Jetzt wird die Dateiendung festgestellt und vorher beschränkt.
+            Bei cover.php habe ich jetzt auf .jpg , .jpeg und .gif beschränkt.
+--------------------------------------------------------------------
+01.11.2024  Im Bereich Einstellungen gibt es jetzt die Möglichkeit
+            die Hintergrundfarbe zu ändern. Die Orginal CSS-Datei heißt
+            jetzt gdweb.css.orginal
+            Nun muss ich nur noch testen, an welchen Stellen es unschöne Effekte gibt
+            und diese dann beseitigen.
+--------------------------------------------------------------------
+12.11.2024  Verschiedene unschöne Effekte beseitig.
+            Bei der Gelegenheit habe ich noch einen Fehler
+            bei Hochladen Alben beseitigt.
+            Jetzt werden die die Sourcen richtig angezeigt.
+--------------------------------------------------------------------
+22.11.2024  Beim Hochladen einer OPUS-Datei ist mir aufgefallen,
+            dass der Punkt plötzlich fehlt. Dieses Problem sollte jetzt
+            beseitigt sein. Bei der Gelegeheit wird in die Spalte Bitrate
+            der Codec eingetragen.
+--------------------------------------------------------------------
+23.11.2024  Bei Durchsuchen - Einzelne Musikstücke wurde der Link falsch ausgegeben.
+            /music war zu viel. Problem ist jetzt beseitig.
+            
+--------------------------------------------------------------------
+27.01.2025  Beim Scrip read_from_cd.php gab es einen Fehler im Menüpunkt Korrektur.
+            Ich musse eine Weiche einbauen, die feststellt, ob tracks_temp und album_temp
+            vorhanden sind.
+--------------------------------------------------------------------
+10.02.2025  Die Version GD_Web_Interface_1_2_1.zip hochgeladen.
+            Vorher den Installationsvorgang getestet.
+                        
+--------------------------------------------------------------------
+16.02.2025  Bei alle Alben habe ich eine Korrektur durchgeführt.
+            Da habe ich den Filter evaluation wieder eingebaut,
+            damit bei gesetzen Sterchen weiter geblaettert werden kann.
+            
+--------------------------------------------------------------------
+18.02.2025  Ich habe festgestellt, dass neue Playlisten nicht erstellt werden.
+            Problem in newpl.php beseitig.
+            Ein kosmetische Problem in delete.php beseitigt.
+            
+--------------------------------------------------------------------
+ 28.02.2025 Auf der Seite Optionen (settings.php) eine neuer Rubik Datenbank integriert.
+            Dort gibt es jetzt einen Link zu phpMyAdmin.
+            Die Idee ist, eine Backup & Restore Seite zu erstellen.
+--------------------------------------------------------------------
+ 18.03.2025 Über Optionen gibt es ab jetzt den Menüpunkt "Backup & Restore"
+            Hier ist es möglich einen aktuellen SQL-Dump zu erzeugen.
+            Die SQL-Dump befinden sich dann im Ordner backup
+            Genauso ist es möglich eine Sicherung wieder herzustellen.
+--------------------------------------------------------------------
+09.06.2025  Unter Alle Alben das Springen zu den gefilterten Alben mit Sternchen korrigiert.
+            Oben hat alles richtig funktioniert. Unten aber nicht.
+            Jetzt ist Beider in Ordnung. 
+--------------------------------------------------------------------
+19.01.2026  Beginne das Dateiformat M4A zu implementieren.
+            Mit der Seite für Einstellungen bin ich schon fertig.
+            ffmpeg -i /var/www/html/music/00/track01.wav -c:a aac -b:a 96k /var/www/html/music/00/track01_096k.m4a
+            ffmpeg -i /var/www/html/music/00/track01.wav -c:a aac -b:a 128k /var/www/html/music/00/track01_128k.m4a
+            ffmpeg -i /var/www/html/music/00/track01.wav -c:a aac -b:a 192k /var/www/html/music/00/track01_192k.m4a
+            ffmpeg -i /var/www/html/music/00/track01.wav -c:a aac -b:a 256k /var/www/html/music/00/track01_256k.m4a
+            ffmpeg -i /var/www/html/music/00/track01.wav -c:a aac -b:a 320k /var/www/html/music/00/track01_320k.m4a
+            ffmpeg -i /var/www/html/music/00/track01.wav -c:a alac /var/www/html/music/00/track01_alac.m4a
+            
+            ffmpeg -i /var/www/html/music/00/track01.wav -c:a alac -metadata title="roughboys" -metadata artist="PETE TOWNSHEND" -metadata album="thebestofpetetownshend" -metadata track="1" -metadata date="1996" /var/www/html/music/00/track01_alac.m4a
+            ffmpeg -i /var/www/html/music/00/track01.wav -c:a alac -metadata album="thebestofpetetownshend" -metadata artist="PETE TOWNSHEND" -metadata title="roughboys" -metadata date="1996" -metadata track="1" /var/www/html/music/01/tr0xd2107c0f-1.m4a
+            
+            ffmpeg -i /var/www/html/music/00/track01_test.m4a -metadata title="roughboys" -metadata artist="PETE TOWNSHEND" -metadata album="thebestofpetetownshend" -metadata track="1" -metadata date="1996" -codec copy track01_alac.m4a
+
+13.02.2026  Heute finden die letzten Test's statt. Bisher sieht es recht gut aus.
+            Eine besondere Herausforderung war das Auslesen der Spielzeitlänge.
+            Der Befehl
+            ffmpeg -i track01_alac.m4a > mp3info.txt
+            führt leider zu einer leeren Datei.
+            ffmpeg -i track01_alac.m4a 2> mp3info.txt
+            führt dann zum Erfolg. Es haben sich dann aber Problem beim Extrahieren die Spielzeitlänge ergeben.
+            Die sind nun aber gelöst.
+
+02.06.2026  Den Hochladefilter von Alben für M4A-Dateien erweitert. (album_upload.php)
+            
+                        
+            Dann müsste ich die Erweiterungen nur noch auf der Synology testen.             
+--------------------------------------------------------------------
+27.08.2026  Den Ubuntu-Server per Browser herunterfahren.
+            Die Option befindet sich in settings.php
+--------------------------------------------------------------------
+28.09.2026  Installation auf Ubuntu-Server 26.04 durchgeführt und bei den Test's festgestellt,
+            dass eject und ps nicht funktionieren. Nach längeren Diskussionen mit ChatGPT
+            sind schließlich die Berechtigungen für Apache2 gesetzt worden und in der Anleitung festgehalten.
+            Es wird Zeit eine neue ZIP-Datei hochzuladen.
+            Ich mache mir zur Zeit Gedanken, ob es Sinn macht diese Projekt auf GitHub zu stellen.
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+--------------------------------------------------------------------
+Offene Punkte / Wunschliste:
+
+- Sortieren(Reihenfolge) und Löschen von Playlisten
+
+- Beim Hochladen von Alben sind keine einfachen und doppelten Hochkomma in Titel und Artist erlaubt.
+       
+- Spalte "bitrate" ueberpruefen und korrigieren
+  Dieses Thema betrifft einzelne Dateien und Alben, die in der Anfangszeit eingespielt wurden
+  und/oder hochgeladen wurden. Ein Script zur Korrektur würde sehr lange laufen.
+
+- Möglichkeit, die ID-Tag's nachträglich zu schreiben.
+  Dieses Thema betrifft vorwiegend hochgeladene Dateien und Alben
+  In der Datei read_from_cd.php gibt es einen Bereich der hilfreich ist.
+  Nach "# MP3 Tag schreiben" suchen.
+  Das Ganze funktioniert aber nicht mit OPUS
+  Benötigt werden auch die beiden Zeilen:
+        require_once('getid3/getid3.php');
+        require_once('getid3/write.php');
+  Möglicherweise macht es Sinn, diese Funktion in gddetails.php zu integrieren.
+  Die direkte Verwendung von getid3 zum browsen wird zum Absturz/Laufzeitüberschreitung,
+  wegen zu vieler Dateien, führen.
+
+- Schriftfarbe ändern?
+  Schriftgröße ändern?  
+ 
+- So wie es aussieht ist die Disc-ID nicht eindeutig. Was ist also zu tun?
+
+- Auskommentierte Zeilen in den Scripten entfernen
+  Nicht benötigte Funktionen entfernen
+  Alles was nicht mehr nützlich ist, entfernen.
+  
+- Möglichkeit Informationen oder Links zu Interpreten hinterlegen.
+  Vielleicht macht eine eigene Tabelle sinn.
+  Vielleicht Links zu Wikipedia setzen
+
+
+Unwichtige Punkte:
+
+- Firefox spielt MP3-Dateien selbst ab. Möglicherweise macht es Sinn, einzelne Dateien als Spieleliste auszugeben.
+  Für VLC wird eine XSPF-Datei angeboten. Hat also keine Priorität.
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,57 @@
+/* Jüergen Thöns - erstellt 2014 */
+/*----------------------------------------------------------------------------------------------------*/
+
+/* hier beginnt das für den für den back-top relevante CSS */
+/* TO TOP*/
+#toTop-right {
+    display:none;
+    text-decoration:none;
+    position:fixed;
+    bottom:20px;
+    right:20px;
+    outline:none;
+}
+#toTop-left {
+    display:none;
+    text-decoration:none;
+    position:fixed;
+    bottom:20px;
+    left:20px;
+    outline:none;
+}
+#toTop-center {
+    display:none;
+    text-decoration:none;
+    position:fixed;
+    bottom:10px;
+    left:50%;
+    margin-left:-20px; /*Feintuning je nach Inhalt */
+    outline:none;
+}
+/* hier endet das für den back-top relevante CSS */
+
+/* Bewertungssterne */
+<!--
+.star{
+ height:50px;
+ display:block;
+ margin-left:50px;
+ background:url(img/stern_inactive.gif) left no-repeat;
+}
+
+.active {
+ background:url(img/stern_active.gif) left no-repeat;
+}
+
+.star:hover{
+ background:url(img/stern_active.gif) left no-repeat;
+}
+
+.spacer{
+ display:block;
+ float:left;
+ width:50px;
+ height:50px;
+}
+-->
+/* hier endet Bewertungssterne */

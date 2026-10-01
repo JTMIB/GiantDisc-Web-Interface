@@ -1,0 +1,155 @@
+/* line color of even list lines */
+TR.lneven {
+	background-color : #F4F4F4;
+}
+
+/* line color of odd list lines */
+TR.lnodd {
+	background-color : White;
+}
+
+/* Search form styles */
+TD.selformtit {
+	font-family : Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-weight : bold;
+	font-size : 10px;
+	text-align : left;
+	vertical-align : top;
+}
+
+TD.selform {
+	font-family : Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size : 10px;
+	text-align : left;
+	vertical-align : middle;
+}
+
+TD.trklst {
+	font-family : Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size : 10px;
+	text-align : left;
+	vertical-align : middle;
+}
+
+
+/* menu bar style */
+TD.menuactive {
+	font-family : Verdana, Geneva, Arial, Helvetica, sans-serif;
+	text-align : center;
+	vertical-align : top;
+	background-color : #99CCFF;
+	padding-left : 15px;
+	padding-right : 15px;
+}
+
+TD.menuinactive {
+	font-family : Verdana, Geneva, Arial, Helvetica, sans-serif;
+	text-align : center;
+	vertical-align : top;
+	background-color : #DDDDDD;
+	padding-left : 15px;
+	padding-right : 15px;
+}
+
+TD.menuactive A.menu {
+	text-decoration : none;
+	font-weight : bold;
+	color : Black;
+}
+
+TD.menuinactive A.menu {
+	text-decoration : none;
+	font-weight : bold;
+	color : Black;
+}
+
+A.light {
+	text-decoration : none;
+	font-weight : normal;
+	color : Black;
+	font-size : small;
+}
+
+table.browsemenu td{
+	margin-left : 5px;
+	padding-right : 5px;
+}
+	
+A.brslst {
+	font-family : Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size : 12px;
+	text-align : left;
+	vertical-align : top;
+}
+
+div.maintitle{
+	margin : 15px;
+	font-size : 1.3em;
+	font-weight : bold;
+	color : Teal;
+}
+
+div.genrebox{
+	display : block;
+	font-size : 0.8em;
+	max-width : 170px;
+	float : left;
+	line-height : 1.4em;
+	padding-left : 5px;
+	padding-right : 5px;
+}
+
+div.genrebox a{
+	text-decoration : none;
+}
+
+div.genrebox a.selected{
+	text-decoration : none;
+	font-weight : bold;
+}
+
+div.genrebox img{
+	border : 0;
+}
+
+/* General */
+BODY {
+	background-color: burlywood ;
+	font-family : Verdana, Geneva, Arial, Helvetica, sans-serif;
+}
+
+h2{
+	font-size : 100%;
+}
+
+
+/*  */
+TD.plformtit {
+	font-family : Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-weight : bold;
+	text-align : left;
+	vertical-align : middle;
+	font-size : small;
+}
+TD.plform {
+	font-family : Verdana, Geneva, Arial, Helvetica, sans-serif;
+	text-align : left;
+	vertical-align : middle;
+	font-size : small;
+}
+
+P.menuinactive {
+	text-decoration : none;
+	font-weight : bold;
+	color : Black;
+}
+A.menuactive {
+	text-decoration : none;
+	font-weight : bold;
+	color : Black;
+}
+A.menuinactive {
+	text-decoration : none;
+	font-weight : bold;
+	color : Black;
+}
