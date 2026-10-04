@@ -81,7 +81,7 @@ update-alternatives --config php
 
 To be able to view the database via a browser—and modify it if necessary—I also installed phpMyAdmin:
 
-Dafür wird vorher noch unzip benötigt:
+For this, unzip is required beforehand:
 
 apt install unzip
 
@@ -242,4 +242,13 @@ The upload parameters are intended for uploading audio files. If you expect larg
 systemctl restart apache2
 
 The GiantDisc web interface should now be fully functional. The only potential sticking point is accessing the CD drive. You may need to go to the "Options" – "Settings" menu to select the desired CD/DVD drive. The default setting, `/dev/cdrom`, should suffice. I personally use a retired Esprimo Q900 with a built-in CD/DVD drive; however, these drives tend to age quickly and often become unsuitable for ripping audio CDs. For this reason, I use an external USB CD/DVD drive. In my case, I use `/dev/sr1`.
+
+-----------------------------------------------------------------------------------
+
+I have included two buttons to allow the albums or playlists to be played.
+The first button generates M3U files. The second button generates XSPF files. To ensure the Firefox browser knows how to handle them, two additional entries must be added under Settings > Applications.
+On my system, M3U files launch the foobar2000 player, while XSPF files launch VLC. In principle, it is also possible to use other players.
+In other browsers and on other systems, the settings are tucked away in different places. It would be boring if everything were uniform, after all.
+
+-----------------------------------------------------------------------------------
 
