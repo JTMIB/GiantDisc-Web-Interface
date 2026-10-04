@@ -252,3 +252,80 @@ In other browsers and on other systems, the settings are tucked away in differen
 
 -----------------------------------------------------------------------------------
 
+Backing up data from the GiantDisc web interface
+
+When performing a backup, it is important to back up both the scripts and the underlying directories. The directories 00, 01, and 02—which contain the music and cover art files—are particularly important. The database is another crucial element; this is why the installation of phpMyAdmin was originally so important. I have since integrated a few scripts into the options menu that allow you to create a database dump with a single click. Restoring a backup is now just as quick. This feature is especially useful when migrating to new hardware.
+
+As a side note:
+Back when I was using openSUSE, I used MySQLDumper to create a full backup with a single click and restore an earlier database state just as easily. Unfortunately, however, MySQLDumper is no longer being developed, so it cannot be used with PHP8 and MariaDB.
+
+-----------------------------------------------------------------------------------
+
+Adjust partition
+
+Anyone who has successfully installed Ubuntu might wonder where all the hard drive capacity has gone. If you do not adjust the partition during installation, a large portion of the drive remains unused. However, this can be changed later. To get an overview, enter the following command:
+
+vgdisplay
+
+The relevant figures are then Alloc PE / Size for the partition size currently in use
+and Free PE / Size for the capacity not yet in use.
+
+To get a more detailed overview of the volume group currently in use, you can enter this command:
+
+lvdisplay
+
+If you wish to assign the full capacity of the disk to this volume group, two commands are required:
+
+lvextend -l +100%FREE /dev/ubuntu-vg/ubuntu-lv
+resize2fs /dev/mapper/ubuntu--vg-ubuntu--lv
+
+-----------------------------------------------------------------------------------
+
+Legacy hardware
+
+Da ich bei mir etwas ältere Hardware einsetze, führt dies zu Problemen, wenn sich der Kernel mit der Zeit updatet. Diese Update oder Upgrades führt Ubuntu meist unbemerkt im Hintergrund durch. In den meisten Fällen ist dies auch unproblematisch. Hin und wieder kommt es aber vor, dass ein solches Upgrade bei einem Neustart zu einem "Kernel panic" führt. Man kann sich glücklich schätzen, wenn man noch in der Auswahl einen funktionierenden Kernel hat. Ist dies nicht mehr der Fall, dann steht mal wirklich blöd da. Um dies zu verhindern, muss man im Verzeichnis /etc/apt/apt.conf.d die Datei 20auto-upgrades bearbeiten. Bei mir sieht der Inhalt der Datei dann wie folgt aus:
+
+APT::Periodic::Update-Package-Lists "0";
+APT::Periodic::Unattended-Upgrade "0";
+
+Note: Upgrades are generally important. This measure only makes sense for older hardware that is not supported by newer kernels.
+
+Another sensible measure to prevent data loss is regularly backing up the system drive. I use Macrium Reflect for this purpose. Alternatively, you could of course use Acronis.
+
+As an alternative to the measure described here for preventing a kernel update, there are now other ways to block package and kernel updates.
+
+-----------------------------------------------------------------------------------
+
+Shutting down the server via the browser
+
+To grant the web server permission to shut down the machine,
+a line must be added to /etc/sudoers. The easiest way to do this is using nano.
+sudo visudo
+and then at the end of the file
+www-data ALL=(ALL) NOPASSWD: /usr/sbin/shutdown
+register.
+
+Damit das Script beim Systemstart mit hochläuft:
+sudo nano /etc/systemd/system/shutdown_server.service
+and paste this content:
+
+[Unit]
+Description=Automatischer Start des Python Skripts
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/html/music
+ExecStart=/usr/bin/python3 /var/www/html/music/shutdown_server.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+Automatic startup of the script
+
+sudo systemctl daemon-reload
+sudo systemctl enable shutdown_server.service
+sudo systemctl start shutdown_server.service
+-----------------------------------------------------------------------------------
