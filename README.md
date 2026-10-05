@@ -283,7 +283,7 @@ resize2fs /dev/mapper/ubuntu--vg-ubuntu--lv
 
 Legacy hardware
 
-Da ich bei mir etwas ältere Hardware einsetze, führt dies zu Problemen, wenn sich der Kernel mit der Zeit updatet. Diese Update oder Upgrades führt Ubuntu meist unbemerkt im Hintergrund durch. In den meisten Fällen ist dies auch unproblematisch. Hin und wieder kommt es aber vor, dass ein solches Upgrade bei einem Neustart zu einem "Kernel panic" führt. Man kann sich glücklich schätzen, wenn man noch in der Auswahl einen funktionierenden Kernel hat. Ist dies nicht mehr der Fall, dann steht mal wirklich blöd da. Um dies zu verhindern, muss man im Verzeichnis /etc/apt/apt.conf.d die Datei 20auto-upgrades bearbeiten. Bei mir sieht der Inhalt der Datei dann wie folgt aus:
+Since I use somewhat older hardware, problems arise when the kernel updates over time. Ubuntu usually performs these updates or upgrades silently in the background. In most cases, this causes no issues. However, every now and then, such an upgrade leads to a "kernel panic" upon rebooting. You are lucky if you still have a working kernel available in the boot menu. If that is not the case, you are in a really tight spot. To prevent this, you need to edit the file `20auto-upgrades` in the `/etc/apt/apt.conf.d` directory. Here is what the file looks like on my system:
 
 APT::Periodic::Update-Package-Lists "0";
 APT::Periodic::Unattended-Upgrade "0";
