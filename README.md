@@ -35,7 +35,26 @@ Die orginale Anleitung findet man hier:
 https://thoens.de/?Bastelkiste___GiantDisc-Web-Interface
 
 -----------------------------------------------------------------------------------
+## Lizenz & Credits
 
+This project is licensed as open-source software under the **GNU General Public License, Version 3 (GPLv3)**. The full license text can be found in the `LICENSE` file.
+
+### Credits & Acknowledgments
+* **Modernization & Expansion:** I completely redeveloped the import and encoding scripts, as well as the adaptations for modern PHP and database versions.
+* **Core Structure:** The web interface's basic structure is based on the original GiantDisc interface by **Rolf Brugger**.
+* **Metadata Analysis:** The **getID3()** library by James Heinrich is used to read audio tags (integrated in its original form under the GPL).
+* 
+-----------------------------------------------------------------------------------
+## Lizenz & Credits
+
+Dieses Projekt ist als Open-Source-Software unter der **GNU General Public License, Version 3 (GPLv3)** lizenziert. Der vollständige Lizenztext befindet sich in der Datei `LICENSE`.
+
+### Credits & Danksagungen
+* **Modernisierung & Erweiterung:** Die Einlese- und Codier-Skripte sowie die Anpassungen an moderne PHP- und Datenbank-Versionen wurden komplett von mir neu entwickelt.
+* **Basisstruktur:** Das Web-Interface basiert in seiner Grundstruktur auf dem originalen GiantDisc-Interface von **Rolf Brugger**.
+* **Metadaten-Analyse:** Für das Auslesen der Audio-Tags wird die Bibliothek **getID3()** von James Heinrich verwendet (integriert im Originalzustand unter der GPL).
+* 
+-----------------------------------------------------------------------------------
 Instructions
 
 After the initial installation, enabling SSH, and setting a root password (sudo passwd root), the server's IP address is required—unless a static address was already assigned during installation. This address is necessary to connect via PuTTY.
