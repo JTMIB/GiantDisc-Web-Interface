@@ -10,6 +10,8 @@ What can you do with the GiantDisc web interface?
 - Store album cover art
 - Assign a 0- to 5-star rating to albums for filtering within the "All Albums" view
 - One-click database backup and recovery
+- Über Optionen / Einstellungen - kann man derzeit zwischen zwei Sprachen wählen
+- Über Optionen / Einstellungen lässt sich auch der bevorzugte Codec, das Einlesegerät und die Hintergrundfarbe einstellen
 
 The original instructions can be found here:
 https://thoens.de/?Bastelkiste___GiantDisc-Web-Interface
@@ -30,6 +32,8 @@ Was kann man GiantDisc Web Interface tun:
 - CD-Cover für ein Album hinterlegen
 - 0 bis 5 Sternchen für ein Album vergeben um in "Alle Alben" danach zu selektieren
 - Datenbank Backup und Recover per Mausklick
+- You can currently choose between two languages ​​via Options / Settings.
+- The preferred codec, the input device, and the background color can also be set via Options / Settings.
 
 Die orginale Anleitung findet man hier:
 https://thoens.de/?Bastelkiste___GiantDisc-Web-Interface
