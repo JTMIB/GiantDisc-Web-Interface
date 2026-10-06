@@ -2,7 +2,7 @@
 
 ###########################################################################
 # prefered format
-$prefc = "m4a";
+$prefc = "mp3";
 #$prefc = "mp3";
 #$prefc = "ogg";
 #$prefc = "flac";
@@ -11,8 +11,8 @@ $prefc = "m4a";
 
 ###########################################################################
 # Sprache - language
-$language = "de";
-require "german_utf8.inc";
+$language = "en";
+require "english.inc";
 #$language = "de";
 #$language = "en";
 
