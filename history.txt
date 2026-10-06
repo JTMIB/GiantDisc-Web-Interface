@@ -619,7 +619,9 @@ Noch ein paar Links:
             ob sie noch benötigt werden.
             
             admin.php kann schon Mal weg.
-            
+            gdweb-settings.php kann schon Mal weg.
+            gdwebdef.php kann schon Mal weg.
+              
             Die Sprache auf englisch gestellt.
             Den Hintergrund auf weiß gestellt.
             
@@ -664,10 +666,8 @@ Offene Punkte / Wunschliste:
   Vielleicht macht eine eigene Tabelle sinn.
   Vielleicht Links zu Wikipedia setzen
 
-- Wofür ist admin.php gut?          -> kann weg
-  Wofür ist idtag_set.php gut?
-  Wofür ist gdweb-settings.php gut?
-  Wofür ist gdwebdef.php gut?
+- Wofür ist idtag_set.php gut?      -> Da gab es wohl mal eine Idee.
+
   
 
 Unwichtige Punkte:
