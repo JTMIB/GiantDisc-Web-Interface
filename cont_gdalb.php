@@ -13,8 +13,7 @@
  
 include "control_web.inc";
 include "gdwebdef.php";
-
-$playtp = set_get_cookie($setplaytp, "playtp", "dl", $HTTP_COOKIE_VARS);
+$playtp = set_get_cookie($_GET['setplaytp'] ?? null, "playtp", "dl", $_COOKIE);
 
 print_header ("settings", "", "$cgi_dir", "$char_set", $output135, $output136, $output137, $output138);
 
@@ -23,9 +22,13 @@ $link =  mysqli_connect( MYSQL_HOST, MYSQL_USER, MYSQL_PASS,  MYSQL_DB );
      die( "Keine Verbindung zu MySQL" );
 
 ## Variablen aus Browser-Zeile
-$artist=$_GET['artist'];
-$title=$_GET['title'];
-$genre=$_GET['genre']; 
+$artist=$_GET['artist'] ?? null;
+$title=$_GET['title'] ?? null;
+$showcomposer = $_GET['showcomposer'] ?? '';
+$composer = $_GET['composer'] ?? '';
+$showmodified = $_GET['showmodified'] ?? '';
+$modified = $_GET['modified'] ?? '';
+$genre=$_GET['genre'] ?? null; 
      
 function show_selform($showartist, $artist, $showtitle, $title,
        $showcomposer, $composer,
@@ -95,11 +98,11 @@ else
     }
 
 	
-  print("<p><small><b>".mysqli_affected_rows( $link )." machting tracks</b></small></p>");
+  print("<p><small><b>".gd_affected($link)." machting tracks</b></small></p>");
   print("<table border=\"0\" cellspacing=\"0\">\n");
 
   $evenln = 1;
-  while($row = mysqli_fetch_array($recset)) {
+  while($row = gd_fetch_array($recset)) {
     if ($evenln){
       print "<tr class=\"lneven\">";
 	}
@@ -124,7 +127,7 @@ else
   print("</table>\n");
 /*
 */
-  mysqli_free_result($recset);
+  gd_free($recset);
   mysqli_close( $link ); 
 }
 ?>

@@ -47,14 +47,14 @@ b {color:black}
 <div class=\"head\"><h1 style=\"color:gray;padding-left:3px\">TrackType.org (beta)</h1></div>
 <div style=\"background-color:orange;margin-top:3px;padding:3px\">";
 
-  $link =  mysql_connect( MYSQL_HOST, MYSQL_USER, MYSQL_PASS );
+  $link =  mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
   if ( ! $link )
       die( "Keine Verbindung zu MySQL" );
 
-$ergebnis = mysql_db_query( "GiantDisc", "SELECT cddbid FROM album_temp" );
-while ( $datensatz = mysql_fetch_row( $ergebnis ) )
+$ergebnis = mysqli_query($link, "SELECT cddbid FROM album_temp" );
+while ( $datensatz = gd_fetch_row($ergebnis) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		{
 		#print "$feld";
 		}
@@ -73,7 +73,7 @@ print "
 </body>
 </html>";
 
-  mysql_free_result($recset);
-  mysql_close( $link );
+  gd_free($recset);
+  mysqli_close($link);
 
 ?>

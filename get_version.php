@@ -13,6 +13,8 @@
  
 print "<h1>Version</h1><br>";
 $PHPVersion = phpversion();
+$ver = array(0 => '', 1 => '', 2 => '');
+$phpver = false;
 //Ausgabe
 echo"Version:".$PHPVersion;
 print "<br>";

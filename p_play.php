@@ -15,18 +15,17 @@ include "control_web.inc";
 include "gdwebdef.php";
 
 ## Variablen aus Browser-Zeile
-$l0=$_GET['l0']; 
-$albid=$_GET['albid'];
-$step=$_GET['step'];
-
-$playtp = set_get_cookie($setplaytp, "playtp", "dl", $HTTP_COOKIE_VARS);
+$l0=$_GET['l0'] ?? null; 
+$albid=$_GET['albid'] ?? null;
+$step=$_GET['step'] ?? null;
+$playtp = set_get_cookie($_GET['setplaytp'] ?? null, "playtp", "dl", $_COOKIE);
 
 #######################################################################################
 #print_header ("browse", "", "$cgi_dir", "$char_set");
 #print_header ("play", "play", "play", "play");
 ###############################################################
 # nach player suchen
-exec("ps -ef | grep $b_player > $tempdir/play.txt");
+@exec("ps -ef | grep $b_player > $tempdir/play.txt");
 # stop
 if ($step != "stop")
   {
@@ -34,13 +33,13 @@ if ($step != "stop")
 $a = 0;
 
 $file = "$tempdir/play.txt";
-$file_handle = fopen($file, 'r');
+$file_handle = @fopen($file, 'r');
  
 while (!feof($file_handle)) {
  
   $line = fgets($file_handle);
 #  print "$line<br>";
-  $pos = strpos($line, "/usr/bin/$b_player $mp3dir");
+  $pos = strpos(gd_str($line), "/usr/bin/$b_player $mp3dir");
 #  print "$pos<br>";
   if ($pos === FALSE)
     {
@@ -48,10 +47,10 @@ while (!feof($file_handle)) {
     }
   else
     {
-    $ausgabe = substr($line, $pos);
+    $ausgabe = substr(gd_str($line), $pos);
 #    print "$ausgabe<br>";
     $a++;
-    $titel_nr = explode("/", $ausgabe);
+    $titel_nr = explode("/", gd_str($ausgabe));
 #    print "$titel_nr[9]<br>";
     $titel_nummer = $titel_nr[9]; 
     }
@@ -141,19 +140,19 @@ function popUp1(wintype)
 
 
 #######################################################################################
-  $link =  mysql_connect( MYSQL_HOST, MYSQL_USER, MYSQL_PASS );
+  $link =  mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
   if ( ! $link )
       die( "Keine Verbindung zu MySQL" );
 
 #######################################################################################
 ### Constants
-$link =  mysql_connect( MYSQL_HOST, MYSQL_USER, MYSQL_PASS );
+$link =  mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
   if ( ! $link )
       die( "Keine Verbindung zu MySQL" );
 
-$recset = mysql_db_query ("GiantDisc", "SELECT title from playlist WHERE id = $albid");      
+$recset = mysqli_query($link, "SELECT title from playlist WHERE id = $albid");      
 
-while($row = mysql_fetch_object($recset))
+while($row = gd_fetch_object($recset))
    {
    $title = $row->title;
    }
@@ -161,13 +160,13 @@ while($row = mysql_fetch_object($recset))
   #print "<b>$title</b><br>";
 
 
-  mysql_free_result($recset);
-  mysql_close( $link );
+  gd_free($recset);
+  mysqli_close($link);
 
 #######################################################################################
 if ($step == "next")
     {
-    exec("sudo -u root /usr/bin/killall mplayer > /dev/null");
+    @exec("sudo -u root /usr/bin/killall mplayer > /dev/null");
     }
 
 #######################################################################################
@@ -177,7 +176,7 @@ if ($step == "start" or $step == "stop")
 # alten Job stoppen
 $anz_kill = 0;
 $dateiname = "$tempdir/b_player.sh";
-$file_handle = fopen($dateiname, 'r');
+$file_handle = @fopen($dateiname, 'r');
 while (!feof($file_handle)) {
  
   $line = fgets($file_handle);
@@ -189,7 +188,7 @@ fclose($file_handle);
 
 touch ("$tempdir/kill.sh");
 $dateiname = "$tempdir/kill.sh";
-$fp = fopen( $dateiname, 'w');
+$fp = @fopen( $dateiname, 'w');
 fwrite( $fp, "#\n");
 $i = 0;
 while($i < $anz_kill) {
@@ -199,35 +198,35 @@ while($i < $anz_kill) {
    fwrite( $fp, "sudo -u root killall $b_player\n");
 }
 fclose( $fp );
-exec("$tempdir/kill.sh");
+@exec("$tempdir/kill.sh");
 }
 
 ###############################################################
 # start  
-if ($step == "start" && strcmp($l0, "prPlaylist")==0)
+if ($step == "start" && strcmp(gd_str($l0), "prPlaylist")==0)
 {
 # Datei anlegen
 touch ("$tempdir/b_player.sh");
 $dateiname = "$tempdir/b_player.sh";
-$fp = fopen( $dateiname, 'w');
+$fp = @fopen( $dateiname, 'w');
 fwrite( $fp, "#\n");
 
-$link =  mysql_connect( MYSQL_HOST, MYSQL_USER, MYSQL_PASS );
+$link =  mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
   if ( ! $link )
       die( "Keine Verbindung zu MySQL" );
 
-$recset = mysql_db_query ("GiantDisc",
+$recset = mysqli_query($link,
  "SELECT tracks.mp3file
   FROM tracks, playlistitem
   WHERE playlistitem.playlist = $albid AND playlistitem.trackid = tracks.id");      
 
-  $anz_row = mysql_num_rows( $recset );
+  $anz_row = gd_num_rows($recset);
 #  print "$anz_row<br>";
 
 
-while ( $datensatz = mysql_fetch_row( $recset ) )
+while ( $datensatz = gd_fetch_row($recset) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		  {
 #			print "sudo -u root /usr/bin/$b_player $PATH_ABSOLUTE_mp3/$feld<br>";
 			fwrite( $fp, "sudo -u root /usr/bin/$b_player $PATH_ABSOLUTE_mp3/$feld\n");
@@ -235,10 +234,10 @@ while ( $datensatz = mysql_fetch_row( $recset ) )
 	}
 fclose( $fp );
 
-  exec("/srv/www/htdocs/music/00/b_player.sh > /dev/null &");
+  @exec("/srv/www/htdocs/music/00/b_player.sh > /dev/null &");
 
-mysql_free_result($recset);
-mysql_close( $link );
+gd_free($recset);
+mysqli_close($link);
 }
   
 #print "$l0<br>";
@@ -249,17 +248,17 @@ mysql_close( $link );
 
 ###############################################################
 # nach player suchen
-#exec("ps -ef | grep $b_player > $tempdir/play.txt");
+#@exec("ps -ef | grep $b_player > $tempdir/play.txt");
 
 
 $file = "$tempdir/play.txt";
-$file_handle = fopen($file, 'r');
+$file_handle = @fopen($file, 'r');
  
 while (!feof($file_handle)) {
  
   $line = fgets($file_handle);
 #  print "$line<br>";
-  $pos = strpos($line, "/usr/bin/$b_player $mp3dir");
+  $pos = strpos(gd_str($line), "/usr/bin/$b_player $mp3dir");
 #  print "$pos<br>";
   if ($pos === FALSE)
     {
@@ -267,9 +266,9 @@ while (!feof($file_handle)) {
     }
   else
     {
-    $ausgabe = substr($line, $pos);
+    $ausgabe = substr(gd_str($line), $pos);
 #    print "$ausgabe<br><br>";
-    $titel_nr = explode("/", $ausgabe);
+    $titel_nr = explode("/", gd_str($ausgabe));
 #    print "$titel_nr[9]<br>";
     $titel_nummer = $titel_nr[9]; 
     }
@@ -279,7 +278,7 @@ fclose($file_handle);
 
 ###############################################################
 # Ausgabe von Playlist No und Playlist Name mit Titelliste
-$link =  mysql_connect( MYSQL_HOST, MYSQL_USER, MYSQL_PASS );
+$link =  mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
   if ( ! $link )
       die( "Keine Verbindung zu MySQL" );
 
@@ -293,22 +292,22 @@ print "<tr><td>";
 # Liste
 $pl_id = $albid;
 #p_listen ($pl_id, $title, $PATH_ABSOLUTE_mp3, $output080, $output082, $tool, $output091, $output092);
-$ergebnis = mysql_db_query( "GiantDisc","select artist, title, tracknumber, id from tracks, playlistitem
+$ergebnis = mysqli_query($link,"select artist, title, tracknumber, id from tracks, playlistitem
 where trackid = id
 and playlist = $pl_id" );
-$anz_felder = mysql_num_fields( $ergebnis );
+$anz_felder = gd_num_fields($ergebnis);
 
-  #if (mysql_affected_rows()>0){print "<hr noshade>";}else{print "<p>&nbsp;</p>";}
-  print("<p><small><b>".mysql_affected_rows()." tracks in $title</b></small></p>");
+  #if (gd_affected($link)>0){print "<hr noshade>";}else{print "<p>&nbsp;</p>";}
+  print("<p><small><b>".gd_affected($link)." tracks in $title</b></small></p>");
 
 echo("<tr><td><table><tr><td><small><b>Track-No.</b></small></td><td><small><b>Artist</b></small></td><td><small><b>Title</b></small></td><td>&nbsp;</td></tr>");
 
 $a = 0;
 #$track = 1;
 $evenln = 1;
-while ( $datensatz = mysql_fetch_row( $ergebnis ) )
+while ( $datensatz = gd_fetch_row($ergebnis) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		  {
 		  switch ($a)
 		  	{
@@ -335,23 +334,23 @@ while ( $datensatz = mysql_fetch_row( $ergebnis ) )
 					}
 
 				print "<td class=\"trklst\">$track</td><td class=\"trklst\">$artist</td><td class=\"trklst\">$title</td>";
-        $test_reihe = mysql_db_query( "GiantDisc","select trackid from playlistitem where $pl_id = playlist");
-				$anz_row = mysql_num_rows( $test_reihe );
+        $test_reihe = mysqli_query($link,"select trackid from playlistitem where $pl_id = playlist");
+				$anz_row = gd_num_rows($test_reihe);
 
-				$recset = mysql_db_query( "GiantDisc","select mp3file from tracks where $feld = id");
-				while ( $datastep = mysql_fetch_row( $recset ) )
+				$recset = mysqli_query($link,"select mp3file from tracks where $feld = id");
+				while ( $datastep = gd_fetch_row($recset) )
 					{
-					foreach ( $datastep as $field )
+					foreach (gd_arr($datastep) as $field )
 						{
-						#$httphost = $_SERVER["HTTP_HOST"];
-						#$l = strlen($PATH_ABSOLUTE_mp3) - 3;
+						#$httphost = $_SERVER["HTTP_HOST"] ?? null;
+						#$l = strlen(gd_str($PATH_ABSOLUTE_mp3)) - 3;
 						#$mp3path = substr($PATH_ABSOLUTE_mp3,$l,3);
             						
 						print "<td class=\"trklst\">";
 											
             #hier
-				    $lyric = mysql_db_query( "GiantDisc","select lyrics from tracks where id = $feld and lyrics IS NOT NULL" );
-        		$anz_lyric = mysql_num_rows( $lyric );
+				    $lyric = mysqli_query($link,"select lyrics from tracks where id = $feld and lyrics IS NOT NULL" );
+        		$anz_lyric = gd_num_rows($lyric);
         		#print "$anz_lyric";
             if ($anz_lyric > 0)
                 {
@@ -364,7 +363,7 @@ while ( $datensatz = mysql_fetch_row( $ergebnis ) )
                 }				
 						
             # aktives Stück
-            $vergleich = levenshtein ($field, $titel_nummer);
+             $vergleich = levenshtein(gd_str($field), gd_str($titel_nummer));
 #            print "<br>$vergleich<br>";
 #            print "$titel_nummer<br>";
 #            print strlen ($titel_nummer);
@@ -386,7 +385,7 @@ while ( $datensatz = mysql_fetch_row( $ergebnis ) )
 						}
 					}
 
-				mysql_free_result($recset);
+				gd_free($recset);
 				$a = 0;
 #				$track++;
 				$evenln = 1-$evenln;
@@ -450,8 +449,8 @@ else
 
 print "</td></tr>";   
 print "</table>";  
-  mysql_free_result($recset);
-  mysql_close( $link );
+  gd_free($recset);
+  mysqli_close($link);
 
 #################################################################################################  
 ?>

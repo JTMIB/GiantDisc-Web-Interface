@@ -13,9 +13,10 @@
  
 include "control_web.inc";
 include "gdwebdef.php";
+$sel = '';
 
 ## Variablen aus Browser-Zeile
-$id=$_GET['id']; 
+$id=$_GET['id'] ?? null; 
 
 ?>
 
@@ -44,13 +45,13 @@ $id=$_GET['id'];
       die( "Keine Verbindung zu MySQL" );
 
 $ergebnis = mysqli_query( $link , "SELECT artist, title, lyrics, year  FROM tracks where id = $id" );
-$anz_felder = mysqli_num_fields( $ergebnis );
-$anz_row = mysqli_num_rows( $ergebnis );
+$anz_felder = gd_num_fields($ergebnis);
+$anz_row = gd_num_rows($ergebnis);
 
 $a = 0;
-while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+while ( $datensatz = gd_fetch_row($ergebnis) )
 	{
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		{
 		 $a = $a + 1;
 
@@ -107,7 +108,7 @@ print "<pre>$lyrics</pre>";
 <?php
 print "<table align='right' border='0' cellspacing='0' cellpadding='1'><tr><td class=\"menu".$sel."active\"><a class=\"menu\" href=\"#\" onclick=\"self.close();\">$output090</a></td></tr></table>";
 
-#  mysql_free_result($recset);
+#  gd_free($recset);
   mysqli_close( $link );
 
 ?>

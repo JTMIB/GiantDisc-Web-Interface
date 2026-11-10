@@ -14,8 +14,7 @@
 include "control_web.inc";
 #include "playlist.inc";
 #include "gdwebdef.php";
-
-$playtp = set_get_cookie($setplaytp, "playtp", "dl", $HTTP_COOKIE_VARS);
+$playtp = set_get_cookie($_GET['setplaytp'] ?? null, "playtp", "dl", $_COOKIE);
 
 print_header ("settings", "", "$cgi_dir", "$char_set", $output135, $output136, $output137, $output138);
 
@@ -28,10 +27,10 @@ $link =  mysqli_connect( MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB );
      die( "Keine Verbindung zu MySQL" );
       
 $ergebnis = mysqli_query( $link, "SELECT * FROM album" );
-$anz_album = mysqli_num_rows( $ergebnis );
+$anz_album = gd_num_rows($ergebnis);
 
 $ergebnis = mysqli_query( $link, "SELECT mp3file FROM tracks" );
-$anz_track = mysqli_num_rows( $ergebnis );
+$anz_track = gd_num_rows($ergebnis);
 
 $db_00 = diskfreespace("$tempdir/");
 $db_01 = diskfreespace("$mp3dir/");
@@ -42,30 +41,30 @@ $db_use = 0;
 $db_use00 = 0;
 $db_use01 = 0;
 $db_use02 = 0;
-while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+while ( $datensatz = gd_fetch_row($ergebnis) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		  {
-#			$db_use = filesize("/home/music/00/$feld");
+#			$db_use = @filesize("/home/music/00/$feld");
 #			$db_use00 = $db_use00 + $db_use;
-#			$db_use = filesize("/home/music/01/$feld");
+#			$db_use = @filesize("/home/music/01/$feld");
 #			$db_use01 = $db_use01 + $db_use;
-#			$db_use = filesize("/home/music/02/$feld");
+#			$db_use = @filesize("/home/music/02/$feld");
 #			$db_use02 = $db_use02 + $db_use
 
 			if (file_exists("$tempdir/$feld") == true)
 				{
-				$db_use = filesize("$tempdir/$feld");
+				$db_use = @filesize("$tempdir/$feld");
 				$db_use00 = $db_use00 + $db_use;
 				}
 			if (file_exists("$mp3dir/$feld") == true)
 				{
-				$db_use = filesize("$mp3dir/$feld");
+				$db_use = @filesize("$mp3dir/$feld");
 				$db_use01 = $db_use01 + $db_use;
 				}
 			if (file_exists("$imagedir/$feld") == true)
 				{
-				$db_use = filesize("$imagedir/$feld");
+				$db_use = @filesize("$imagedir/$feld");
 				$db_use02 = $db_use02 + $db_use;
 				}
 
@@ -74,32 +73,32 @@ while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
 
 #cover	
 $ergebnis = mysqli_query( $link, "SELECT coverimg FROM album" );
-$anz_album = mysqli_num_rows( $ergebnis );
-while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+$anz_album = gd_num_rows($ergebnis);
+while ( $datensatz = gd_fetch_row($ergebnis) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		  {
 		  if ($feld != NULL)
 		  {
 			if (file_exists("$tempdir/$feld") == true)
 				{
-				$db_use = filesize("$tempdir/$feld");
+				$db_use = @filesize("$tempdir/$feld");
 				$db_use00 = $db_use00 + $db_use;
 				}
 			if (file_exists("$mp3dir/$feld") == true)
 				{
-				$db_use = filesize("$mp3dir/$feld");
+				$db_use = @filesize("$mp3dir/$feld");
 				$db_use01 = $db_use01 + $db_use;
 				}
 			if (file_exists("$imagedir/$feld") == true)
 				{
-				$db_use = filesize("$imagedir/$feld");
+				$db_use = @filesize("$imagedir/$feld");
 				$db_use02 = $db_use02 + $db_use;
 				}
 		  }	
 		  }
     }
-mysqli_free_result($ergebnis);
+gd_free($ergebnis);
 
 
 $db_00un = "KByte";
@@ -147,15 +146,15 @@ $sth = 0;
 $stm = 0;
 
 $ergebnis = mysqli_query( $link, "SELECT length FROM tracks" );
-$anz_zeil = mysqli_num_rows( $ergebnis );
-while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+$anz_zeil = gd_num_rows($ergebnis);
+while ( $datensatz = gd_fetch_row($ergebnis) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		  {
 		  $stime = $stime + $feld;
 		  }
 	}
-mysqli_free_result($ergebnis);
+gd_free($ergebnis);
 while ( $stime > 3600)
 	{
 	$sth++;

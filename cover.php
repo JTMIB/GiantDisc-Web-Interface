@@ -27,12 +27,12 @@ print_header ("settings", "", "$cgi_dir", "$char_set", $output135, $output136, $
       die( "Keine Verbindung zu MySQL" );
 
 ## Variablen aus Browser-Zeile
-$cddbid=$_GET['cddbid'];
+$cddbid=$_GET['cddbid'] ?? null;
       
 $recset = mysqli_query ( $link, "SELECT artist, title, composer, cddbid, coverimg, covertxt, modified, genre FROM album WHERE cddbid = '$cddbid' ");
 
 
-while($row = mysqli_fetch_object($recset))
+while($row = gd_fetch_object($recset))
    {
    $artist = $row->artist;
    $title = $row->title;
@@ -64,9 +64,9 @@ if ($genre == "")
 else
     {
     $recset = mysqli_query ( $link, "SELECT genre FROM genre WHERE id = '$genre' ");
-    #$anz_row = mysql_num_rows( $recset );
+    #$anz_row = gd_num_rows($recset);
     #print "$anz_row<br>";
-    while($row = mysqli_fetch_object($recset))
+    while($row = gd_fetch_object($recset))
         {
         $show_genre = $row->genre;
         }    
@@ -107,12 +107,12 @@ print "<td> &nbsp; &nbsp; &nbsp;</td>";
 print "<td>";
 $abfrage_stern = mysqli_query( $link,"SELECT evaluation FROM album_fav WHERE cddbid LIKE '%$cddbid%'" );
 
-$anz_reihen_stern = mysqli_num_rows( $abfrage_stern );
+$anz_reihen_stern = gd_num_rows($abfrage_stern);
 if ( $anz_reihen_stern >= 1 )
     {
-        while ( $datensatz = mysqli_fetch_row( $abfrage_stern ) )
+        while ( $datensatz = gd_fetch_row($abfrage_stern) )
 	     {
-        foreach ( $datensatz as $field )
+        foreach (gd_arr($datensatz) as $field )
 		      {
 		      $feld = $field;
 		      }
@@ -223,7 +223,7 @@ if ( $anz_reihen_stern >= 1 )
 print "</tr>";   
 print "</table>";
 
-  mysqli_free_result($recset);
+  gd_free($recset);
   mysqli_close( $link );
 
 ?>

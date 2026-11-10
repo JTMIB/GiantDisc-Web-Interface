@@ -11,6 +11,7 @@
  * veröffentlicht, weitergeben und/oder modifizieren (Version 3 der Lizenz).
  */
  
+ini_set('pcre.jit', 0);
 require_once('getid3/getid3.php');
 
 print "get FLAC<br>";

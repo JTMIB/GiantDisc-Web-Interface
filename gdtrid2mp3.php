@@ -23,27 +23,26 @@
 
 include "control_web.inc";
 
-#$link =  mysql_connect( MYSQL_HOST, MYSQL_USER );
+#$link =  mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
 #  if ( ! $link )
 #      die( "Keine Verbindung zu MySQL" );
 
 ## Variablen aus Browser-Zeile
-$playtp=$_GET['playtp'];
-$prAlbum=$_GET['prAlbum'];
-$albid=$_GET['albid'];
-$id=$_GET['id'];
-if (isset($_GET['prPlaylist'])) {
-    $prPlaylist = $_GET['prPlaylist'];
-}
+$playtp=$_GET['playtp'] ?? null;
+$prAlbum=$_GET['prAlbum'] ?? null;
+$albid=$_GET['albid'] ?? null;
+$id=$_GET['id'] ?? null;
+$mp3f = $_GET['mp3f'] ?? null;
+$prPlaylist = $_GET['prPlaylist'] ?? null;
 				
 if(isset($mp3f)){
   $mp3path = full_mp3_fname($mp3f);
 }
 
-$httphost = $_SERVER["HTTP_HOST"];
+$httphost = $_SERVER["HTTP_HOST"] ?? null;
 
 ### Dynamically send file
-if (strcmp($playtp, "df")==0){
+if (strcmp(gd_str($playtp), "df")==0){
   header("Content-Type: audio/mp3");
   header("Content-Location: ".$mp3path);
   #header("Content-Disposition: filename=".$mp3path);
@@ -55,7 +54,7 @@ if (strcmp($playtp, "df")==0){
 ##########################################################################
 ### Winamp Playlist remote file (URL / http)
 
-if (strcmp($playtp, "pr")==0 && !isset($prAlbum)){
+if (strcmp(gd_str($playtp), "pr")==0 && !isset($prAlbum)){
 
  if ($prPlaylist >= 0){
  $link =  mysqli_connect( MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB );
@@ -73,9 +72,9 @@ if (strcmp($playtp, "pr")==0 && !isset($prAlbum)){
 
 
 $a = 0;
-while ( $datensatz = mysqli_fetch_row( $recset ) )
+while ( $datensatz = gd_fetch_row($recset) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		  {
 		  if ( $a == 0 )
 			{
@@ -90,7 +89,7 @@ while ( $datensatz = mysqli_fetch_row( $recset ) )
 				{print "$feld"."\n";}
 			if ( $a == 3)
 				{
-				$l = strlen($PATH_ABSOLUTE_mp3) - 3;
+				$l = strlen(gd_str($PATH_ABSOLUTE_mp3)) - 3;
 				$mp3path = substr($PATH_ABSOLUTE_mp3,$l,3);
 				print "http://$httphost/music"."$mp3path"."/";
 				print "$feld"."\n";
@@ -101,7 +100,7 @@ while ( $datensatz = mysqli_fetch_row( $recset ) )
 		  		{$a = 0;}
 		  }
 	}
- mysqli_free_result($recset);
+ gd_free($recset);
  mysqli_close( $link );  
  }
  else
@@ -111,14 +110,14 @@ while ( $datensatz = mysqli_fetch_row( $recset ) )
       die( "Keine Verbindung zu MySQL" );
   $abfrage = "SELECT * FROM tracks WHERE id=".$id." ";    	
   $recset = mysqli_query ( $link , $abfrage);
-  if($row = mysqli_fetch_array($recset)) {
+  if($row = gd_fetch_array($recset)) {
     header("Content-disposition: inline; filename=foo.m3u");
     header("Content-Type: audio/x-mpegurl");
     header("Content-Location: foo.m3u");
     print "#EXTM3U\n";
     print "#EXTINF:".$row[length].",".$row[artist]." - ".$row[title]."\n";
     print "http://$httphost/~music/webint/".$mp3path."\n";
-    mysqli_free_result($recset);
+    gd_free($recset);
     mysqli_close( $link );  
  }
   }
@@ -147,7 +146,7 @@ $link =  mysqli_connect( MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB );
    header("Content-Location: playlist.m3u");
 
   print "#EXTM3U\n";
-  while($row = mysqli_fetch_array($recset)) {
+  while($row = gd_fetch_array($recset)) {
    ###  Sonderzeichen zurück tauschen
    if (isset($row['artist'])) {
     $row['artist'] = str_replace("&#39;", "'", $row['artist']);
@@ -165,14 +164,14 @@ $link =  mysqli_connect( MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB );
    print "\n";
    
 
-    $l = strlen($PATH_ABSOLUTE_mp3) - 3;
+    $l = strlen(gd_str($PATH_ABSOLUTE_mp3)) - 3;
     $mp3path = substr($PATH_ABSOLUTE_mp3,$l,3);
     print "http://$httphost/music"."$mp3path"."/";
     print "$row[mp3file]";
     print "\n";
 
 }
-   mysqli_free_result($recset);
+   gd_free($recset);
    mysqli_close( $link );   
 #   exit;
 }
@@ -180,7 +179,7 @@ $link =  mysqli_connect( MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB );
   
 ##########################################################################
 ### Redirect to mp3 file
-if (strcmp($playtp, "rd")==0){
+if (strcmp(gd_str($playtp), "rd")==0){
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>

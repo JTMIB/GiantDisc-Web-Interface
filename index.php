@@ -13,6 +13,7 @@
  
 include "control_web.inc";
 include "gdwebdef.php";
+$chk = array();
 
 # mysql
 $chk['mysqlaccess'] = mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
@@ -20,16 +21,16 @@ $chk['mysqlaccess'] = mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
 
 ## Variablen aus Browser-Zeile
 if (isset($_GET['artist'])) {
-    $artist = $_GET['artist'];
+    $artist = $_GET['artist'] ?? null;
 }
 if (isset($_GET['title'])) {
-    $title = $_GET['title'];
+    $title = $_GET['title'] ?? null;
 }
 if (isset($_GET['genre'])) {
-    $genre = $_GET['genre'];
+    $genre = $_GET['genre'] ?? null;
 }
 if (isset($_GET['rating'])) {
-    $rating = $_GET['rating'];
+    $rating = $_GET['rating'] ?? null;
 }
  
 
@@ -48,6 +49,8 @@ $chk['mp3rw'] = is_dir($PATH_ABSOLUTE_mp3) && is_readable($PATH_ABSOLUTE_mp3) &&
 # PHP-Version
 
 $PHPVersion = phpversion();
+$ver = array(0 => '', 1 => '', 2 => '');
+$phpver = false;
 $a = 0;
 $teil = strtok ( $PHPVersion, "." );
 while ($teil) {
@@ -81,7 +84,7 @@ if ( (int)$ver[2] >= 5 )
 # prüfen nach rip.txt und im Zweifelsfall erstellen
 $err_riptxt = 0;
 $dateiname = "00/rip.txt";
-$fp = fopen( $dateiname, "r" ) or $err_riptxt = 1;
+$fp = @fopen( $dateiname, "r" ) or $err_riptxt = 1;
 fclose( $fp );
 if ($err_riptxt == 1) {
 	touch ("$tempdir/rip.txt");
@@ -112,9 +115,9 @@ if(ini_get("register_long_arrays") == "1")
   }
 
 $uploadmaxfilesize = ini_get('upload_max_filesize');
-$uploadmaxfilesize = explode("=", $uploadmaxfilesize);
+$uploadmaxfilesize = explode("=", gd_str($uploadmaxfilesize));
 $uploadmaxfilesize = $uploadmaxfilesize[0];
-$lang = strlen($uploadmaxfilesize);
+$lang = strlen(gd_str($uploadmaxfilesize));
 $lang = $lang - 1;
 $uploadmaxfilesize = substr($uploadmaxfilesize,0,$lang);
 $uploadmaxfilesize = (int)$uploadmaxfilesize;
@@ -129,9 +132,9 @@ else
   }
 
 $postmaxsize = ini_get('post_max_size');
-$postmaxsize = explode("=", $postmaxsize);
+$postmaxsize = explode("=", gd_str($postmaxsize));
 $postmaxsize = $postmaxsize[0];
-$lang = strlen($postmaxsize);
+$lang = strlen(gd_str($postmaxsize));
 $lang = $lang - 1;
 $postmaxsize = substr($postmaxsize,0,$lang);
 $postmaxsize = (int)$postmaxsize;
@@ -146,9 +149,9 @@ else
   }
 
 $maxexecutiontime = ini_get('max_execution_time');
-$maxexecutiontime = explode("=", $maxexecutiontime);
+$maxexecutiontime = explode("=", gd_str($maxexecutiontime));
 $maxexecutiontime = $maxexecutiontime[0];
-$lang = strlen($maxexecutiontime);
+$lang = strlen(gd_str($maxexecutiontime));
 #$lang = $lang - 1;
 $maxexecutiontime = substr($maxexecutiontime,0,$lang);
 $maxexecutiontime = (int)$maxexecutiontime;
@@ -244,7 +247,7 @@ if ($bashplayer == "yes" && $read_CD == "yes")
 #########################################
 
 	# check if there were errors
-	$a=false; foreach($chk as $e=>$value) {
+	$a=false; foreach (gd_arr($chk) as $e=>$value) {
 		if (!$value) { $a = true; break; }
 		if ($phpver == false)
 		  {
@@ -606,7 +609,7 @@ if ($bashplayer == "yes" && $b_player == "mplayer")
 else
 	{
 
-#$playtp = set_get_cookie($setplaytp, "playtp", "dl", $HTTP_COOKIE_VARS);
+#$playtp = set_get_cookie($setplaytp, "playtp", "dl", $_COOKIE);
 
 print_header ("search", "", "$cgi_dir", "$char_set", $output135, $output136, $output137, $output138);
 
@@ -674,9 +677,9 @@ show_searchform($artist, $title, $genre, $lang, $yearfrom, $yearto, $rating,
 #print "Cookie: playtp".$playtp.", showartist ".$showartist." <br>";
 
   ### VERY preliminary query
-  if (strlen($rating)==0){$rating=0;}
+  if (strlen(gd_str($rating))==0){$rating=0;}
 
-if(strlen($artist) >0 OR strlen($title) >0 OR strlen($genre) >0){
+if(strlen(gd_str($artist)) >0 OR strlen(gd_str($title)) >0 OR strlen(gd_str($genre)) >0){
 
 ###  Sonderzeichen tauschen
 $artist = str_replace("'","&#39;",$artist);
@@ -688,12 +691,12 @@ $title = str_replace("'","&#39;",$title);
   $abfrage = "SELECT * FROM tracks WHERE artist LIKE '%$artist%' AND title LIKE '%".$title."%' AND (genre1 LIKE '".$genre."%' OR genre2 LIKE '".$genre."%') AND rating>=".$rating." ";
   $recset = mysqli_query ( $link, $abfrage);
 
-  if (mysqli_affected_rows( $link )>0){print "<hr noshade>";}else{print "<p>&nbsp;</p>";}
-  print("<p><small><b>".mysqli_affected_rows( $link )." machting tracks</b></small></p>");
+  if (gd_affected($link)>0){print "<hr noshade>";}else{print "<p>&nbsp;</p>";}
+  print("<p><small><b>".gd_affected($link)." machting tracks</b></small></p>");
   
   print("<table border=\"0\" cellspacing=\"0\">\n");
   $evenln = 1;
-  while($row = mysqli_fetch_array($recset)) {
+  while($row = gd_fetch_array($recset)) {
     if ($evenln){
       print "<tr class=\"lneven\">";
 	}
@@ -714,7 +717,7 @@ $title = str_replace("'","&#39;",$title);
   print("</table>\n");
 /*
 */
-  mysqli_free_result($recset);
+  gd_free($recset);
   mysqli_close( $link );  
 }
 

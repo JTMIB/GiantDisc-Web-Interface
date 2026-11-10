@@ -12,6 +12,7 @@
  */
  
 require "control_web.inc";
+$current = '';
 #include "gdwebdef.php";
 
 $host = getenv('HTTP_HOST');
@@ -22,15 +23,17 @@ $requ = getenv('REQUEST_URI');
       die( "Keine Verbindung zu MySQL" );
 
 ## Variablen aus Browser-Zeile
-$file=$_GET['file']; 
-$com=$_GET['com'];
-$length=$_GET['length'];  
-      
-#$playtp = set_get_cookie($setplaytp, "playtp", "dl", $HTTP_COOKIE_VARS);
+$file=$_GET['file'] ?? null; 
+$com=$_GET['com'] ?? null;
+$length=$_GET['length'] ?? null;  
+$feld = '';
+$playtp = set_get_cookie($_GET['setplaytp'] ?? null, "playtp", "dl", $_COOKIE);
 
 #########################################
 # PHP-Version
 $PHPVersion = phpversion();
+$ver = array(0 => '', 1 => '', 2 => '');
+$phpver = false;
 $a = 0;
 $teil = strtok ( $PHPVersion, "." );
 while ($teil) {
@@ -118,11 +121,12 @@ if (($com == "playtime") OR ($com == "auto"))
 
 
 	$ergebnis = mysqli_query( $link , "SELECT length, mp3file FROM tracks_temp WHERE length = 0" );
-	$anz_track = mysqli_num_rows( $ergebnis );
+	$anz_track = gd_num_rows($ergebnis);
+	$x = 0;
 
-while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+while ( $datensatz = gd_fetch_row($ergebnis) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		  {
 			$x++;
 			if ($x == 1)
@@ -314,11 +318,11 @@ if ($phpver == true)
       $ergebnis = mysqli_query( $link , "INSERT INTO tracks_temp SELECT * FROM tracks WHERE length = 0 and mp3file LIKE '%m4a%'" );
       }
   }
-#	$ergebnis = mysql_db_query( "GiantDisc", "SELECT * FROM tracks WHERE length = 0" );
+#	$ergebnis = mysqli_query($link, "SELECT * FROM tracks WHERE length = 0" );
 
 
 $ergebnis = mysqli_query( $link , "SELECT length, mp3file FROM tracks_temp WHERE length = 0" );
-$anz_track = mysqli_num_rows( $ergebnis );
+$anz_track = gd_num_rows($ergebnis);
 
 print "$output002 ";
 print "$anz_track";
@@ -328,9 +332,9 @@ print "<TABLE border=1><TR><td><TABLE border=1>";
 print "<TR><TD><B>$output004</B></TD><TD><B>$output005</B></TD><TD><B>$output006</B></TD></TR>";
 $a = 0;
 $x = 0;
-while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+while ( $datensatz = gd_fetch_row($ergebnis) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		  {
 			$x++;
 			if ($x == 1)

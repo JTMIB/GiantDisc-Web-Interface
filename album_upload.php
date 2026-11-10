@@ -18,7 +18,18 @@ include "control_web.inc";
       die( "Keine Verbindung zu MySQL" );
 
 ## Variablen aus Browser-Zeile
-$schritt=$_GET['schritt']; 
+$schritt=$_GET['schritt'] ?? null; 
+$artist=$_GET['artist'] ?? '';
+$title=$_GET['title'] ?? '';
+$composer=$_GET['composer'] ?? '';
+$genre1=$_GET['genre1'] ?? '';
+$genre2=$_GET['genre2'] ?? '';
+$year=$_GET['year'] ?? '';
+$bpm=$_GET['bpm'] ?? '';
+$lang=$_GET['lang'] ?? '';
+$type=$_GET['type'] ?? '';
+$host = getenv('HTTP_HOST') ?: '';
+$requ = getenv('REQUEST_URI') ?: '';
 
 
 if ($schritt == 2)
@@ -88,16 +99,16 @@ case 0:
 		<small><select name=type>";
 		
 		#$selected = 2;
-		$selected = $type + 1;
+		$selected = (int)$type + 1;
 		$recset = mysqli_query ( $link, "SELECT * FROM musictype ORDER BY id");
 		print "<option value=\"\">&nbsp;</option>\n";
-		while($row = mysqli_fetch_array($recset)) {
+		while($row = gd_fetch_array($recset)) {
 			print "<option value=\"".$row["id"]."\"";
 			if ($row["id"] == $selected) {print(" selected");};
 			print ">";
 			print $row["musictype"]."</option>\n";
 		}
-		#  mysql_close( $link );
+		#  mysqli_close($link);
 
 		print "</select></small>
 		</td>
@@ -112,9 +123,9 @@ case 0:
 		$selected = 1;
 		$recset = array("-", "0", "+", "++");
 		print "<option value=\"\">&nbsp;</option>\n";
-		foreach ( $recset as $key => $value) {
+		foreach (gd_arr($recset) as $key => $value) {
 			print "<option value=\"".$key."\"";
-			if (strlen($selected)>0 && $key == $selected) {print(" selected");};
+			if (strlen(gd_str($selected))>0 && $key == $selected) {print(" selected");};
 			print ">";
 			print $value."</option>\n";
 		}
@@ -128,7 +139,7 @@ case 0:
 		$selected = 1;
 		$recset = mysqli_query ( $link, "SELECT * FROM source ORDER BY id");
 		print "<option value=\"\">&nbsp;</option>\n";
-		while($row = mysqli_fetch_array($recset)) {
+		while($row = gd_fetch_array($recset)) {
 			print "<option value=\"".$row["id"]."\"";
 			if ($row["id"] == $selected) {print(" selected");};
 			print ">";
@@ -177,26 +188,26 @@ break;
 
 case 1:
   ## Variablen aus Browser-Zeile
-  $artist=$_GET['artist'];
-  $album=$_GET['album'];
-  $composer=$_GET['composer'];
-  $genre1=$_GET['genre1'];
-  $genre2=$_GET['genre2'];
-  $year=$_GET['year'];
-  $bpm=$_GET['bpm'];
-  $lang=$_GET['lang'];
-  $type=$_GET['type'];
-  $rating=$_GET['rating'];
-  $source=$_GET['source'];
-  $def_artist=$_GET['def_artiste'];
-  $def_years=$_GET['def_years'];
-  $def_composer=$_GET['def_composer'];
-  $def_type=$_GET['def_type'];
-  $def_genres=$_GET['def_genres'];
-  $def_rating=$_GET['def_rating'];
-  $def_lang=$_GET['def_lang'];
-  $def_source=$_GET['def_source'];
-  $anz_track=$_GET['anz_track'];
+  $artist=$_GET['artist'] ?? null;
+  $album=$_GET['album'] ?? null;
+  $composer=$_GET['composer'] ?? null;
+  $genre1=$_GET['genre1'] ?? null;
+  $genre2=$_GET['genre2'] ?? null;
+  $year=$_GET['year'] ?? null;
+  $bpm=$_GET['bpm'] ?? null;
+  $lang=$_GET['lang'] ?? null;
+  $type=$_GET['type'] ?? null;
+  $rating=$_GET['rating'] ?? null;
+  $source=$_GET['source'] ?? null;
+  $def_artist=$_GET['def_artiste'] ?? null;
+  $def_years=$_GET['def_years'] ?? null;
+  $def_composer=$_GET['def_composer'] ?? null;
+  $def_type=$_GET['def_type'] ?? null;
+  $def_genres=$_GET['def_genres'] ?? null;
+  $def_rating=$_GET['def_rating'] ?? null;
+  $def_lang=$_GET['def_lang'] ?? null;
+  $def_source=$_GET['def_source'] ?? null;
+  $anz_track=$_GET['anz_track'] ?? null;
   
   $aartist=$artist;
   $acomposer=$composer;
@@ -228,9 +239,9 @@ case 1:
 		<td class=plformtit>Genre</td>
 		<td colspan=3 class=plform>";
 		$ergebnis = mysqli_query ( $link, "SELECT genre FROM genre WHERE id LIKE '$genre1'" );
-		while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+		while ( $datensatz = gd_fetch_row($ergebnis) )
     		{
-    		foreach ( $datensatz as $feld )
+    		foreach (gd_arr($datensatz) as $feld )
 		  		{
 				print "$feld";
 		  		}
@@ -239,9 +250,9 @@ case 1:
 		<td> </td>
 		<td colspan=3 class=plform>";
 		$ergebnis = mysqli_query ( $link, "SELECT genre FROM genre WHERE id LIKE '$genre2'" );
-		while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+		while ( $datensatz = gd_fetch_row($ergebnis) )
     		{
-    		foreach ( $datensatz as $feld )
+    		foreach (gd_arr($datensatz) as $feld )
 		  		{
 				print "$feld";
 		  		}
@@ -266,9 +277,9 @@ case 1:
 		<td class=plformtit>Language</td>
 		<td colspan=3 class=plform>";
 		$ergebnis = mysqli_query ( $link, "SELECT language FROM language WHERE id LIKE '$lang'" );
-		while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+		while ( $datensatz = gd_fetch_row($ergebnis) )
     		{
-    		foreach ( $datensatz as $feld )
+    		foreach (gd_arr($datensatz) as $feld )
 		  		{
 				print "$feld";
 		  		}
@@ -278,9 +289,9 @@ case 1:
 		<td class=plformtit>Type</td>
 		<td colspan=3 class=plform>";
 		$ergebnis = mysqli_query ($link, "SELECT musictype FROM musictype WHERE id LIKE '$type'" );
-		while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+		while ( $datensatz = gd_fetch_row($ergebnis) )
     		{
-    		foreach ( $datensatz as $feld )
+    		foreach (gd_arr($datensatz) as $feld )
 		  		{
 				print "$feld";
 		  		}
@@ -294,17 +305,17 @@ case 1:
 		$selected = $rating;
 		$recset = array("-", "0", "+", "++");
 
-		foreach ($recset as $key => $value){
-			if (strlen($selected)>0 && $key == $selected) {print("$value");};			
+		foreach (gd_arr($recset) as $key => $value){
+			if (strlen(gd_str($selected))>0 && $key == $selected) {print("$value");};			
 		}
 		print "</td>
 		<td> </td>
 		<td class=plformtit>Source</td>
 		<td colspan=3 class=plform>";
 		$ergebnis = mysqli_query ( $link, "SELECT source FROM source WHERE id LIKE '$source'" );
-		while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+		while ( $datensatz = gd_fetch_row($ergebnis) )
     		{
-    		foreach ( $datensatz as $feld )
+    		foreach (gd_arr($datensatz) as $feld )
 		  		{
 				print "$feld";
 		  		}
@@ -424,7 +435,7 @@ for ( $n = 1; $n <= $anz_track; $n++)
 
 	  $recset = mysqli_query ( $link, "SELECT * FROM musictype ORDER BY id");
 	  print "<option value=\"\">&nbsp;</option>\n";
-	  while($row = mysqli_fetch_array($recset)) {
+	  while($row = gd_fetch_array($recset)) {
 	    print "<option value=\"".$row["id"]."\"";
 	    if ($row["id"] == $selected) {print(" selected");};
 	    print ">";
@@ -442,10 +453,10 @@ for ( $n = 1; $n <= $anz_track; $n++)
 		$selected = $rating;
 		$recset = array("-", "0", "+", "++");
 		print "<option value=\"\">&nbsp;</option>\n";
-#		while(list($key, $value) = each($recset)) {
-		foreach ($recset as $key => $value) {
+#		foreach (gd_arr($recset) as $key => $value) {
+		foreach (gd_arr($recset) as $key => $value) {
 			print "<option value=\"".$key."\"";
-			if (strlen($selected)>0 && $key == $selected) {print(" selected");};
+			if (strlen(gd_str($selected))>0 && $key == $selected) {print(" selected");};
 			print ">";
 			print $value."</option>\n";
 		}
@@ -459,7 +470,7 @@ for ( $n = 1; $n <= $anz_track; $n++)
 
 	  $recset = mysqli_query ( $link, "SELECT * FROM source ORDER BY id");
 	  print "<option value=\"\">&nbsp;</option>\n";
-	  while($row = mysqli_fetch_array($recset)) {
+	  while($row = gd_fetch_array($recset)) {
 	    print "<option value=\"".$row["id"]."\"";
 	    if ($row["id"] == $selected) {print(" selected");};
 	    print ">";
@@ -503,23 +514,23 @@ break;
 
 case 2:
 ## Variablen aus Browser-Zeile
-$aartist=$_POST['aartist']; 
-$aalbum=$_POST['aalbum']; 
-$acomposer=$_POST['acomposer']; 
-$genre=$_POST['genre']; 
-$anz_track=$_POST['anz_track'];
+$aartist=$_POST['aartist'] ?? null; 
+$aalbum=$_POST['aalbum'] ?? null; 
+$acomposer=$_POST['acomposer'] ?? null; 
+$genre=$_POST['genre'] ?? null; 
+$anz_track=$_POST['anz_track'] ?? null;
 
-$artist=$_POST['artist']; 
-$title=$_POST['title']; 
-$composer=$_POST['composer']; 
-$genre1=$_POST['genre1']; 
-$genre2=$_POST['genre2']; 
-$year=$_POST['year']; 
-$bmp=$_POST['bmp']; 
-$langu=$_POST['langu']; 
-$type=$_POST['type'];
-$rating=$_POST['rating'];
-$source=$_POST['source'];
+$artist=$_POST['artist'] ?? null; 
+$title=$_POST['title'] ?? null; 
+$composer=$_POST['composer'] ?? null; 
+$genre1=$_POST['genre1'] ?? null; 
+$genre2=$_POST['genre2'] ?? null; 
+$year=$_POST['year'] ?? null; 
+$bmp=$_POST['bmp'] ?? null; 
+$langu=$_POST['langu'] ?? null; 
+$type=$_POST['type'] ?? null;
+$rating=$_POST['rating'] ?? null;
+$source=$_POST['source'] ?? null;
 
 
 #temporär eine Album-Tabelle und eine Track-Tabelle erzeugen
@@ -528,21 +539,21 @@ $source=$_POST['source'];
 	$modified = date("Y-m-d");
 # letzte cddbid auslesen
 $ergebnis = mysqli_query( $link, "SELECT mp3file FROM tracks WHERE mp3file LIKE 'trxx%'" );
-$anz_felder = mysqli_num_fields( $ergebnis );
-$anz_reihen = mysqli_num_rows( $ergebnis );
+$anz_felder = gd_num_fields($ergebnis);
+$anz_reihen = gd_num_rows($ergebnis);
 
-while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+while ( $datensatz = gd_fetch_row($ergebnis) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		  {
 		  }
     }
 # errechnen von naechster cddbid
 if ($anz_reihen == 0)
 	$feld = "trxx00000000.mp3";
-$feld = substr($feld, 4, 8);
+$feld = substr(gd_str($feld), 4, 8);
 $feld++;
-$lang = strlen($feld);
+$lang = strlen(gd_str($feld));
 $soll = 8 - $lang;
 $y = 0;
 while ($y < $soll)
@@ -573,7 +584,7 @@ while ($n <= $anz_track)
 	# Extension extrahieren
 	$i = $n - 1;
 	$Datei_Name = $_FILES['datei']['name'][$i];
-	$Datei_Name = explode(".", $Datei_Name);
+	$Datei_Name = explode(".", gd_str($Datei_Name));
 	$prefc = "$Datei_Name[1]";
 	$bitrate="$Datei_Name[1]";	
   # Extension extrahieren Ende
@@ -602,7 +613,7 @@ while ($n <= $anz_track)
 # $cddbid erhoehen	
 	$feld = $cddbid;
 	$feld++;
-	$lang = strlen($feld);
+	$lang = strlen(gd_str($feld));
 	$soll = 8 - $lang;
 	$y = 0;
 	while ($y < $soll)

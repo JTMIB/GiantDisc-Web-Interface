@@ -13,10 +13,10 @@
  
 include "control_web.inc";
 include "gdwebdef.php";
-
-$playtp = set_get_cookie($setplaytp, "playtp", "dl", $HTTP_COOKIE_VARS);
+$playtp = set_get_cookie($_GET['setplaytp'] ?? null, "playtp", "dl", $_COOKIE);
 
 print_header ("settings", "", "$cgi_dir", "$char_set", $output135, $output136, $output137, $output138);
+$sel = '';
 
 print "<br><hr><br>";
 
@@ -31,7 +31,7 @@ $mysqlExportPath = $filename;
 
 $mysqlHostName = MYSQL_HOST;
 #print "$mysqlHostName<br>";
-$teile = explode(":", $mysqlHostName);
+$teile = explode(":", gd_str($mysqlHostName));
 #print "$teile[0]<br>";
 $mysqlHostName = $teile[0];
 #print "$mysqlHostName<br>";
@@ -40,7 +40,9 @@ $mysqlHostName = $teile[0];
 #$command='mysqldump --opt -h localhost -u' .MYSQL_USER .' -p' .MYSQL_PASS .' ' .MYSQL_DB .' > ' .$mysqlExportPath;
 $command='mysqldump --opt -h '.$mysqlHostName .' -u' .MYSQL_USER .' -p' .MYSQL_PASS .' ' .MYSQL_DB .' > ' .$mysqlExportPath;
 
-exec($command,$output,$worked);
+$output = array();
+$worked = 0;
+@exec($command,$output,$worked);
 switch($worked){
   case 0:
       print "$output152<b>" .MYSQL_DB ."</b>$output153".getcwd()."/" .$mysqlExportPath ."<br>";

@@ -1,7 +1,32 @@
 <?php
 
-include "gdweb-settings.php";
+#include "gdweb-settings.php";
 include "setting.inc";
+ini_set('pcre.jit', 0);   # PCRE-JIT: unter MemoryDenyWriteExecute sonst Warnung beim 1. preg_*-Aufruf
+###########################################################################
+### Kleine Helfer: liefern immer einen verwertbaren Wert und vermeiden so
+### Warnungen wie "Undefined variable", "Undefined array key" sowie
+### null-Argumente bei String-/Zaehler-Funktionen (PHP 7 und PHP 8).
+
+function gd_str($v)  { return is_scalar($v) ? (string) $v : ''; }
+function gd_int($v)  { return is_numeric($v) ? (int) $v : 0; }
+function gd_arr($v)  { return is_array($v) ? $v : array(); }
+function gd_num_rows($r)   { return ($r instanceof mysqli_result) ? mysqli_num_rows($r) : 0; }
+function gd_num_fields($r) { return ($r instanceof mysqli_result) ? mysqli_num_fields($r) : 0; }
+function gd_free($r)       { if ($r instanceof mysqli_result) { mysqli_free_result($r); } }
+function gd_fetch_array($r)  { return ($r instanceof mysqli_result) ? mysqli_fetch_array($r) : null; }
+function gd_fetch_row($r)    { return ($r instanceof mysqli_result) ? mysqli_fetch_row($r) : null; }
+function gd_fetch_object($r) { return ($r instanceof mysqli_result) ? mysqli_fetch_object($r) : null; }
+function gd_affected($l)     { return ($l instanceof mysqli) ? mysqli_affected_rows($l) : 0; }
+function gd_get($k, $d = '')    { $v = isset($_GET[$k]) ? $_GET[$k] : null;    return is_scalar($v) ? (string) $v : $d; }
+function gd_post($k, $d = '')   { $v = isset($_POST[$k]) ? $_POST[$k] : null;   return is_scalar($v) ? (string) $v : $d; }
+function gd_cookie($k, $d = '') { $v = isset($_COOKIE[$k]) ? $_COOKIE[$k] : null; return is_scalar($v) ? (string) $v : $d; }
+function gd_register_globals() {
+  foreach (gd_arr($_GET) as $k => $v)  { if (!is_string($k) || $k === '' || $k[0] === '' || $k === 'GLOBALS') { continue; } if (is_scalar($v)) { $GLOBALS[$k] = $v; } }
+  foreach (gd_arr($_POST) as $k => $v) { if (!is_string($k) || $k === '' || $k[0] === '' || $k === 'GLOBALS') { continue; } if (is_scalar($v)) { $GLOBALS[$k] = $v; } }
+}
+gd_register_globals();
+
 
 ##############################################################################
 
@@ -134,7 +159,7 @@ $htdocs = "/var/www/html";
 # Berechtigung pruefen
 # $ipadr = getenv(REMOTE_ADDR);
 #  $filename = "hosts.gdd";
-#  $fp = fopen( $filename, "r" ) or die("Konnte $filename nicht �ffnen");
+#  $fp = @fopen( $filename, "r" ) or die("Konnte $filename nicht �ffnen");
 #  $i = 0;
 #  $allow = "no";
 #  while ( ! feof( $fp ) )
@@ -179,9 +204,17 @@ function print_footer($current)
 ### read inbox albums
 
 function read_inbox_albums($strSelFolder, $schritt){
+  $link = mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
+  $pfad = array();
+  $reihe = array();
+  $feld = '';
+  $artist = ''; $title = ''; $genre1 = ''; $genre2 = '';
+  $year = ''; $bpm = ''; $lang = ''; $type = ''; $rating = ''; $source = '';
+  $entry = ''; $cdir = null; $i = 0; $y = 0;
 
 @chdir($strSelFolder);
 $cdir = @dir($strSelFolder);
+if ( ! $cdir ) { return; }
 
 $i = 0;
 while ($entry = $cdir->read()) {
@@ -191,7 +224,7 @@ while ($entry = $cdir->read()) {
 			$folder = urlencode(substr($strSelFolder,0,strrpos($strSelFolder,"/")));
 		 } else {
 		    $folder = urlencode($strSelFolder);
-		    strlen($strSelFolder)==1 ? $sep= "" : $sep= "/";
+		    strlen(gd_str($strSelFolder))==1 ? $sep= "" : $sep= "/";
 		    $folder .= $sep;
 		    $folder .= urlencode($entry);
 		 }
@@ -216,7 +249,8 @@ while ($y < $i)
 	$ausgabe = implode("",$reihe);
 
 // pruefen ob das Verzeichnis leer ist!
-	$cdir = @dir($ausgabe);
+$cdir = @dir($ausgabe);
+	if ( ! $cdir ) { $y++; continue; }
 	$cdir->rewind();
 	$entry = $cdir->read();	# .
 	$entry = $cdir->read();	# ..
@@ -244,7 +278,7 @@ $cdir->rewind();
 clearstatcache();
 $i = 0;
 while ($entry = $cdir->read()) {
-  if (strstr($entry, ".mp3") || strstr($entry, ".ogg") || strstr($entry, ".flac"))
+  if (strstr(gd_str($entry), ".mp3") || strstr(gd_str($entry), ".ogg") || strstr(gd_str($entry), ".flac"))
    {
    if (!is_dir($entry)) {
    	  if ($i++ % 2 == 0) {
@@ -253,7 +287,7 @@ while ($entry = $cdir->read()) {
 	  	 echo "<tr bgcolor=white>";
       }
 	  echo "<td valign=top class=treetext>$entry</td>";
-      echo "<td nowrap class=treetext align=right>".GetRealVolume(filesize($entry))."</td>";
+      echo "<td nowrap class=treetext align=right>".GetRealVolume(@filesize($entry))."</td>";
 # Sind die Dateien lesbar?
 	  $fp = fopen ( $entry, "r" );
 	  if ($fp == false)
@@ -271,7 +305,7 @@ while ($entry = $cdir->read()) {
 
 }
 echo '</table>';
-$cdir->close;
+$cdir->close();
 
 if ($chkopen == 0 && $i > 0)
 {
@@ -346,15 +380,15 @@ print "</select></small>
 <small><select name=type>";
 $selected = 2;
 
-  $recset = mysql_db_query ("GiantDisc", "SELECT * FROM musictype ORDER BY id");
+  $recset = mysqli_query( $link, "SELECT * FROM musictype ORDER BY id");
   print "<option value=\"\">&nbsp;</option>\n";
-  while($row = mysql_fetch_array($recset)) {
+  while($row = gd_fetch_array($recset)) {
     print "<option value=\"".$row["id"]."\"";
     if ($row["id"] == $selected) {print(" selected");};
     print ">";
 	print $row["musictype"]."</option>\n";
   }
-#  mysql_close( $link );
+#  mysqli_close($link);
 
 print "</select></small>
 </td>
@@ -367,9 +401,9 @@ print "</select></small>
 $selected = 1;
   $recset = array("-", "0", "+", "++");
   print "<option value=\"\">&nbsp;</option>\n";
-  while(list($key, $value) = each($recset)) {
+  foreach (gd_arr($recset) as $key => $value) {
     print "<option value=\"".$key."\"";
-    if (strlen($selected)>0 && $key == $selected) {print(" selected");};
+    if (strlen(gd_str($selected))>0 && $key == $selected) {print(" selected");};
     print ">";
 	print $value."</option>\n";
   }
@@ -382,15 +416,15 @@ print "</select></small>
 <small><select name=source>";
 $selected = 1;
 
-  $recset = mysql_db_query ("GiantDisc", "SELECT * FROM source ORDER BY id");
+  $recset = mysqli_query( $link, "SELECT * FROM source ORDER BY id");
   print "<option value=\"\">&nbsp;</option>\n";
-  while($row = mysql_fetch_array($recset)) {
+  while($row = gd_fetch_array($recset)) {
     print "<option value=\"".$row["id"]."\"";
     if ($row["id"] == $selected) {print(" selected");};
     print ">";
 	print $row["source"]."</option>\n";
   }
-#  mysql_close( $link );
+#  mysqli_close($link);
 
 #print_source_options($source+1);
 print "</select></small>
@@ -406,24 +440,24 @@ print "</td></tr></table>";
 
 
 # letzte cddbid auslesen
-$ergebnis = mysql_db_query ("GiantDisc", "SELECT mp3file FROM tracks WHERE mp3file LIKE 'trxx%'" );
-$anz_felder = mysql_num_fields( $ergebnis );
-$anz_reihen = mysql_num_rows( $ergebnis );
+$ergebnis = mysqli_query( $link, "SELECT mp3file FROM tracks WHERE mp3file LIKE 'trxx%'");
+$anz_felder = gd_num_fields($ergebnis);
+$anz_reihen = gd_num_rows($ergebnis);
 
-while ( $datensatz = mysql_fetch_row( $ergebnis ) )
+while ( $datensatz = gd_fetch_row($ergebnis) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		  {
 		  }
     }
-#mysql_close( $link );
+#mysqli_close($link);
 
 # errechnen von naechster cddbid
 if ($anz_reihen == 0)
 	$feld = "trxx00000000.mp3";
-$feld = substr($feld, 4, 8);
+$feld = substr(gd_str($feld), 4, 8);
 $feld++;
-$lang = strlen($feld);
+$lang = strlen(gd_str($feld));
 $soll = 8 - $lang;
 $y = 0;
 while ($y < $soll)
@@ -478,7 +512,7 @@ function GetRealVolume($v = 0) {
 ###########################################################################
 # strack_temp erstellen
 function strack_temp() {
-#$createtable = mysql_db_query( "GiantDisc", "CREATE TABLE strack_temp (
+#$createtable = mysqli_query($link, "CREATE TABLE strack_temp (
 $con = mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
 $createtable = mysqli_query( $con, "CREATE TABLE strack_temp (
 artist        varchar(255),
@@ -551,7 +585,7 @@ PRIMARY KEY (ID)
 ###########################################################################
 # album_temp erstellen
 function album_temp() {
-#$createtable = mysql_db_query( "GiantDisc", "CREATE TABLE album_temp (
+#$createtable = mysqli_query($link, "CREATE TABLE album_temp (
 $con = mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
 $createtable = mysqli_query( $con, "CREATE TABLE album_temp (
 artist		varchar(255),
@@ -571,11 +605,11 @@ genre		varchar(10)
 function full_mp3_fnames($fname)
 # returns the full path+filename for the mp3 file 'fname'
 {
-  if (strlen($fname)>=8){
-    #exec("/bin/ls /home/music/??/".$fname, $fullname);
-    exec("/bin/ls /srv/www/htdocs/music/??/".$fname, $fullname);
-    $fullname[0] = substr( $fullname[0], strlen( "/srv/www/htdocs" ));
-    return $fullname[0];
+  if (strlen(gd_str($fname))>=8){
+    #@exec("/bin/ls /home/music/??/".$fname, $fullname);
+    @exec("/bin/ls /srv/www/htdocs/music/??/".$fname, $fullname);
+    $fullname[0] = substr( $fullname[0] ?? '', strlen( "/srv/www/htdocs" ));
+    return $fullname[0] ?? '';
   }
   else{
     return "";
@@ -585,6 +619,7 @@ function full_mp3_fnames($fname)
 
 function write_alphabet($prefix)
 {
+  $anz_row = 0;
   # Zahlen
   $cnt = ord("0");
   while ($cnt <= ord("9")){
@@ -592,37 +627,37 @@ function write_alphabet($prefix)
   	# Album by Artist
 	if ($prefix == "browse.php?l0=al-ar&l1="){
 	$fig = chr($cnt);
-#    $tempquery = mysql_db_query( "GiantDisc", "SELECT * FROM album WHERE artist LIKE '$fig%'");
+#    $tempquery = mysqli_query($link, "SELECT * FROM album WHERE artist LIKE '$fig%'");
     $con = mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
     $tempquery = mysqli_query( $con, "SELECT * FROM album WHERE artist LIKE '$fig%'");
-	$anz_row = mysqli_num_rows( $tempquery );
+	$anz_row = gd_num_rows($tempquery);
 	}
 
   	# Album by Title
 	if ($prefix == "browse.php?l0=al-ti&l1="){
 	$fig = chr($cnt);
-    #$tempquery = mysql_db_query( "GiantDisc", "SELECT * FROM album WHERE title LIKE '$fig%'");
+    #$tempquery = mysqli_query($link, "SELECT * FROM album WHERE title LIKE '$fig%'");
     $con = mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
     $tempquery = mysqli_query( $con, "SELECT * FROM album WHERE title LIKE '$fig%'");
-	$anz_row = mysqli_num_rows( $tempquery );
+	$anz_row = gd_num_rows($tempquery);
 	}
 
   	# Tracks by Artist
 	if ($prefix == "browse.php?l0=tr-ar&l1="){
 	$fig = chr($cnt);
-    #$tempquery = mysql_db_query( "GiantDisc", "SELECT * FROM tracks WHERE artist LIKE '$fig%'");
+    #$tempquery = mysqli_query($link, "SELECT * FROM tracks WHERE artist LIKE '$fig%'");
     $con = mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
     $tempquery = mysqli_query( $con, "SELECT * FROM tracks WHERE artist LIKE '$fig%'");
-	$anz_row = mysqli_num_rows( $tempquery );
+	$anz_row = gd_num_rows($tempquery);
 	}
 
   	# Tracks by Title
 	if ($prefix == "browse.php?l0=tr-ti&l1="){
 	$fig = chr($cnt);
-    #$tempquery = mysql_db_query( "GiantDisc", "SELECT * FROM tracks WHERE artist LIKE '$fig%'");
+    #$tempquery = mysqli_query($link, "SELECT * FROM tracks WHERE artist LIKE '$fig%'");
     $con = mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
     $tempquery = mysqli_query( $con, "SELECT * FROM tracks WHERE artist LIKE '$fig%'");
-	$anz_row = mysqli_num_rows( $tempquery );
+	$anz_row = gd_num_rows($tempquery);
 	}
 
 	if ($anz_row > 0)
@@ -645,8 +680,9 @@ function write_alphabet($prefix)
 function write_aristlink($prefix, $artist)
 {
   global $trunclen;
-  if (strlen($artist)>$trunclen){
-    $art = substr($artist, 0, $trunclen);
+  if (!isset($trunclen)) { $trunclen = 30; }
+  if (strlen(gd_str($artist))>$trunclen){
+    $art = substr(gd_str($artist), 0, $trunclen);
     $appendix="..";
   }
   else{
@@ -662,17 +698,23 @@ function write_aristlink($prefix, $artist)
 ### read from cd album
 function read_cd_album($act)
 {
+  global $overwrite;
+  if (!isset($overwrite)) { $overwrite = ''
+; }
+  $artist = ''; $title = ''; $composer = ''; $genre1 = ''; $genre2 = '';
+  $year = ''; $bpm = ''; $lang = ''; $type = ''; $rating = ''; $source = '';
+  $feld = ''; $datensatz = null;
 
-#$ergebnis = mysql_db_query( "GiantDisc", "SELECT * FROM album_temp" );
+#$ergebnis = mysqli_query($link, "SELECT * FROM album_temp" );
 $link =  mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
 $ergebnis = mysqli_query( $link, "SELECT * FROM album_temp" );
-#$anz_felder = mysql_num_fields( $ergebnis );
-$anz_felder = mysqli_num_rows($ergebnis);
+#$anz_felder = gd_num_fields($ergebnis);
+$anz_felder = gd_num_rows($ergebnis);
 
 $a = 0;
-while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+while ( $datensatz = gd_fetch_row($ergebnis) )
 	{
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		{
 		 $a = $a + 1;
 
@@ -696,16 +738,16 @@ while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
 			}
 		}
 	}
-#mysql_close( $link );
+#mysqli_close($link);
 
-#$ergebnis = mysql_db_query( "GiantDisc", "SELECT * FROM tracks_temp" );
+#$ergebnis = mysqli_query($link, "SELECT * FROM tracks_temp" );
 $ergebnis = mysqli_query( $link, "SELECT * FROM tracks_temp" );
-$anz_felder = mysqli_num_fields( $ergebnis );
+$anz_felder = gd_num_rows($ergebnis);
 
 $a = 0;
-while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+while ( $datensatz = gd_fetch_row($ergebnis) )
 	{
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		{
 		 $a = $a + 1;
 
@@ -816,18 +858,18 @@ print "</select></small>
 <td class=plform>
 <small><select name=type>";
 #$selected = 2;
-$selected = $type + 1;
+$selected = (int)$type + 1;
 
-#  $recset = mysql_db_query ("GiantDisc", "SELECT * FROM musictype ORDER BY id");
+#  $recset = mysqli_query( $link, "SELECT * FROM musictype ORDER BY id");
   $recset = mysqli_query ( $link , "SELECT * FROM musictype ORDER BY id");
   print "<option value=\"\">&nbsp;</option>\n";
-  while($row = mysqli_fetch_array($recset)) {
+  while($row = gd_fetch_array($recset)) {
     print "<option value=\"".$row["id"]."\"";
     if ($row["id"] == $selected) {print(" selected");};
     print ">";
 	print $row["musictype"]."</option>\n";
   }
-#  mysql_close( $link );
+#  mysqli_close($link);
 
 print "</select></small>
 </td>
@@ -841,10 +883,10 @@ print "</select></small>
 $selected = $rating;
   $recset = array("-", "0", "+", "++");
   print "<option value=\"\">&nbsp;</option>\n";
-#  while(list($key, $value) = each($recset)) {
-  foreach ($recset as $key => $value) {
+#  foreach (gd_arr($recset) as $key => $value) {
+  foreach (gd_arr($recset) as $key => $value) {
     print "<option value=\"".$key."\"";
-    if (strlen($selected)>0 && $key == $selected) {print(" selected");};
+    if (strlen(gd_str($selected))>0 && $key == $selected) {print(" selected");};
     print ">";
 	print $value."</option>\n";
   }
@@ -860,13 +902,13 @@ $selected = 1;
 
   $recset = mysqli_query ( $link, "SELECT * FROM source ORDER BY id");
   print "<option value=\"\">&nbsp;</option>\n";
-  while($row = mysqli_fetch_array($recset)) {
+  while($row = gd_fetch_array($recset)) {
     print "<option value=\"".$row["id"]."\"";
     if ($row["id"] == $selected) {print(" selected");};
     print ">";
 	print $row["source"]."</option>\n";
   }
-#  mysql_close( $link );
+#  mysqli_close($link);
 
 #print_source_options($source+1);
 print "</select></small>
@@ -881,15 +923,18 @@ print "</select></small>
 ### read from cd track
 function read_cd_track($lfn_track)
 {
+  $artist = ''; $title = ''; $composer = ''; $genre1 = ''; $genre2 = '';
+  $year = ''; $bpm = ''; $lang = ''; $type = ''; $rating = ''; $source = '';
+  $feld = ''; $datensatz = null;
   $link =  mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
   if ( ! $link )
       die( "Keine Verbindung zu MySQL" );
 $ergebnis = mysqli_query( $link , "SELECT artist, title, composer, genre1, genre2, year, bpm, lang, type, rating, source FROM tracks_temp where tracknb = '$lfn_track'" );
-$anz_felder = mysqli_num_fields( $ergebnis );
+$anz_felder = gd_num_rows($ergebnis);
 $z = 0;
-while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+while ( $datensatz = gd_fetch_row($ergebnis) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		{
 		$z++;
 		switch ($z)
@@ -947,7 +992,7 @@ while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
 	}
 
 
-#mysql_close( $link );
+#mysqli_close($link);
 
 print "<form action=read_from_cd.php method=get>";
 print "<table border=0><tr><td>";
@@ -1014,13 +1059,13 @@ $selected = $type;
 
   $recset = mysqli_query ( $link , "SELECT * FROM musictype ORDER BY id");
   print "<option value=\"\">&nbsp;</option>\n";
-  while($row = mysqli_fetch_array($recset)) {
+  while($row = gd_fetch_array($recset)) {
     print "<option value=\"".$row["id"]."\"";
     if ($row["id"] == $selected) {print(" selected");};
     print ">";
 	print $row["musictype"]."</option>\n";
   }
-#  mysql_close( $link );
+#  mysqli_close($link);
 
 print "</select></small>
 </td>
@@ -1034,10 +1079,10 @@ print "</select></small>
 $selected = $rating;
   $recset = array("-", "0", "+", "++");
   print "<option value=\"\">&nbsp;</option>\n";
-#  while(list($key, $value) = each($recset)) {
-  foreach($recset as $key => $value) {
+#  foreach (gd_arr($recset) as $key => $value) {
+  foreach (gd_arr($recset) as $key => $value) {
     print "<option value=\"".$key."\"";
-    if (strlen($selected)>0 && $key == $selected) {print(" selected");};
+    if (strlen(gd_str($selected))>0 && $key == $selected) {print(" selected");};
     print ">";
 	print $value."</option>\n";
   }
@@ -1050,7 +1095,7 @@ print "</select></small>
 <td class=plform>
 <small><select name=source>";
 #$selected = 1;
-$selected = $source + 1;
+$selected = (int)$source + 1;
 #  $benutzer = "music";
 #  $passwort = "music";
 #  $db = "GiantDisc";
@@ -1058,13 +1103,13 @@ $selected = $source + 1;
 
   $recset = mysqli_query ( $link , "SELECT * FROM source ORDER BY id");
   print "<option value=\"\">&nbsp;</option>\n";
-  while($row = mysqli_fetch_array($recset)) {
+  while($row = gd_fetch_array($recset)) {
     print "<option value=\"".$row["id"]."\"";
     if ($row["id"] == $selected) {print(" selected");};
     print ">";
 	print $row["source"]."</option>\n";
   }
-#  mysql_close( $link );
+#  mysqli_close($link);
 
 #print_source_options($source+1);
 print "</select></small>
@@ -1085,7 +1130,7 @@ function print_header($current, $redirect, $cgi_dir, $char_set, $output135, $out
 // if $current is not empty, the main top menu is printed
 {
   $redir="";
-  if (strlen($redirect)>1){
+  if (strlen(gd_str($redirect))>1){
     $redir = "<meta http-equiv=\"REFRESH\" content=\"0;url=$redirect\">";
   }
   print "<!DOCTYPE html
@@ -1128,9 +1173,9 @@ function popUp1(wintype)
 
 <?php
 
-$host = getenv('HTTP_HOST');
+$host = getenv('HTTP_HOST') ?: '';
 #$host = "localhost";
-$requ = getenv('REQUEST_URI');
+$requ = getenv('REQUEST_URI') ?: '';
 #$requ = $redirect;
 $wort = strtok($requ, "?");
 $a = 0;
@@ -1148,13 +1193,13 @@ while (is_string( $wort ) )
 	}
 
 
-if (strcmp($current, "startrec")==0)
+if (strcmp(gd_str($current), "startrec")==0)
 	print "<META HTTP-EQUIV='Refresh' CONTENT='2; URL=$cgi_dir/music.pl?file=start&com=ripit&uri=http://$host$requ'>";
 
-if (strcmp($current, "aufnahme")==0)
+if (strcmp(gd_str($current), "aufnahme")==0)
 	print "<META HTTP-EQUIV='Refresh' CONTENT='10; URL=$cgi_dir/music.pl?file=watch&com=ripit&uri=http://$host$requ'>";
 
-if (strcmp($current, "fin")==0)
+if (strcmp(gd_str($current), "fin")==0)
   {
 	print "<META HTTP-EQUIV='Refresh' CONTENT='5; URL=corrpt.php?com=auto'>";
   }
@@ -1162,7 +1207,7 @@ if (strcmp($current, "fin")==0)
   print "</head>
   <body>";
 
-if (strcmp($current, "fin")==0)
+if (strcmp(gd_str($current), "fin")==0)
   {
   print "<audio autoplay reload controls>";
   print "<source src=\"img/tada.mp3\">";
@@ -1186,24 +1231,24 @@ if (strcmp($current, "fin")==0)
 
 
 
-  if (strlen($current)>1){
+  if (strlen(gd_str($current))>1){
     // print the main top menu
     print "<table border='0' cellspacing='0' cellpadding='1'><tr>";
 
-    $sel = (strcmp($current, "search")==0) ? "" : "in";
+    $sel = (strcmp(gd_str($current), "search")==0) ? "" : "in";
     #print "<td class=\"menu".$sel."active\"><a class=\"menu\" href=\"index.php\">Search</a></td>";
     print "<td class=\"menu".$sel."active\"><a class=\"menu\" href=\"index.php\">$output135</a></td>";
     print "<td>&nbsp;</td>";
-    $sel = (strcmp($current, "browse")==0) ? "" : "in";
+    $sel = (strcmp(gd_str($current), "browse")==0) ? "" : "in";
     #print "<td class=\"menu".$sel."active\"><a class=\"menu\" href=\"browse.php\">Browse</a></td>";
     print "<td class=\"menu".$sel."active\"><a class=\"menu\" href=\"browse.php\">$output136</a></td>";
     print "<td>&nbsp;</td>";
-    $sel = (strcmp($current, "record")==0) ? "" : "in";
+    $sel = (strcmp(gd_str($current), "record")==0) ? "" : "in";
     #print "<td class=\"menu".$sel."active\"><a class=\"menu\" href=\"record.php\">Record</a></td>";
     print "<td class=\"menu".$sel."active\"><a class=\"menu\" href=\"record.php\">$output137</a></td>";
 
 #        print "<td>&nbsp;</td>";
-#        $sel = (strcmp($current, "play")==0) ? "" : "in";
+#        $sel = (strcmp(gd_str($current), "play")==0) ? "" : "in";
 #        print "<td class=\"menu".$sel."active\">";
 #        print "<a class=\"menu\" href=\"play.php?l0=thisalb";
 #        print "&albid=".$albumrecord["cddbid"];
@@ -1211,7 +1256,7 @@ if (strcmp($current, "fin")==0)
 #        print "\">Play</a></td>";
 
     print "<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>";
-    $sel = (strcmp($current, "settings")==0) ? "" : "in";
+    $sel = (strcmp(gd_str($current), "settings")==0) ? "" : "in";
     #print "<td class=\"menu".$sel."active\"><a class=\"light\" href=\"settings.php\">Options</a></td>";
     print "<td class=\"menu".$sel."active\"><a class=\"light\" href=\"settings.php\">$output138</a></td>";
      
@@ -1226,13 +1271,13 @@ if (strcmp($current, "fin")==0)
 ### functions
 function print_genre_options($selected)
 {
-  #$recset = mysql_db_query ("GiantDisc", "SELECT * FROM genre ORDER BY id");
+  #$recset = mysqli_query($link, "SELECT * FROM genre ORDER BY id");
   $link =  mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
   if ( ! $link )
       die( "Keine Verbindung zu MySQL" );  
   $recset = mysqli_query ( $link, "SELECT * FROM genre ORDER BY id");
   print "<option value=\"\">&nbsp;</option>\n";
-  while($row = mysqli_fetch_array($recset)) {
+  while($row = gd_fetch_array($recset)) {
     print "<option value=\"".$row["id"]."\"";
     if ($row["id"] == $selected) {print(" selected");};
     print ">";
@@ -1249,14 +1294,14 @@ function print_genre_string($genre)
       die( "Keine Verbindung zu MySQL" );
       
   $recset = mysqli_query ( $link, "SELECT * FROM genre WHERE id='$genre'");
-  if($row = mysqli_fetch_array($recset)) {
+  if($row = gd_fetch_array($recset)) {
 	print $row["genre"];
   }
 }
 
 function print_lang_options($selected)
 {
-#  $recset = mysql_db_query ("GiantDisc", "SELECT * FROM language ORDER BY id");
+#  $recset = mysqli_query($link, "SELECT * FROM language ORDER BY id");
   $link =  mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
   if ( ! $link )
       die( "Keine Verbindung zu MySQL" );
@@ -1266,7 +1311,7 @@ function print_lang_options($selected)
 #          ."FROM language,tracks WHERE tracks.lang=language.id "
 #          ."GROUP BY language.id ORDER BY freq DESC ");
   print "<option value=\"\">&nbsp;</option>\n";
-  while($row = mysqli_fetch_array($recset)) {
+  while($row = gd_fetch_array($recset)) {
     print "<option value=\"".$row["id"]."\"";
     if ($row["id"] == $selected) {print(" selected");};
     print ">";
@@ -1282,7 +1327,7 @@ function print_type_options($selected)
       
   $recset = mysqli_query ( $link, "SELECT * FROM musictype ORDER BY id");
   print "<option value=\"\">&nbsp;</option>\n";
-  while($row = mysqli_fetch_array($recset)) {
+  while($row = gd_fetch_array($recset)) {
     print "<option value=\"".$row["id"]."\"";
     if ($row["id"] == $selected) {print(" selected");};
     print ">";
@@ -1298,7 +1343,7 @@ function print_source_options($selected)
       
   $recset = mysqli_query ( $link, "SELECT * FROM source ORDER BY id");
   print "<option value=\"\">&nbsp;</option>\n";
-  while($row = mysqli_fetch_array($recset)) {
+  while($row = gd_fetch_array($recset)) {
     print "<option value=\"".$row["id"]."\"";
     if ($row["id"] == $selected) {print(" selected");};
     print ">";
@@ -1310,10 +1355,10 @@ function print_rating_options($selected)
 {
   $recset = array("-", "0", "+", "++");
   print "<option value=\"\">&nbsp;</option>\n";
-#  while(list($key, $value) = each($recset)) {
-  foreach ($recset as $key => $value) {
+#  foreach (gd_arr($recset) as $key => $value) {
+  foreach (gd_arr($recset) as $key => $value) {
     print "<option value=\"".$key."\"";
-    if (strlen($selected)>0 && $key == $selected) {print(" selected");};
+    if (strlen(gd_str($selected))>0 && $key == $selected) {print(" selected");};
     print ">";
 	print $value."</option>\n";
   }
@@ -1322,26 +1367,31 @@ function print_rating_options($selected)
 function print_rating_string($rating)
 {
   $recset = array("-", "0", "+", "++");
-#  while(list($key, $value) = each($recset)) {
-  foreach ($recset as $key => $value) {
+#  foreach (gd_arr($recset) as $key => $value) {
+  foreach (gd_arr($recset) as $key => $value) {
     if ($key == $rating) {print($value);};
   }
 }
 
 function language_string($language)
 {
-  $recset = mysql_db_query ("GiantDisc", "SELECT * FROM language WHERE id='$language'");
-  if($row = mysql_fetch_array($recset)) {
+  $link = mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
+  if ( ! $link ) { return ''; }
+  $recset = mysqli_query( $link, "SELECT * FROM language WHERE id=$language");
+  if($row = gd_fetch_array($recset)) {
     return $row["language"];
   }
+  return '';
 }
+
+
 
 function print_condition_options($selected)
 {
   $recset = array("ok", "noisy", "damaged");
   print "<option value=\"\">&nbsp;</option>\n";
-#  while(list($key, $value) = each($recset)) {
-  foreach ($recset as $key => $value) {
+#  foreach (gd_arr($recset) as $key => $value) {
+  foreach (gd_arr($recset) as $key => $value) {
     print "<option value=\"".$key."\"";
     if ($key == $selected) {print(" selected");};
     print ">";
@@ -1351,21 +1401,22 @@ function print_condition_options($selected)
 
 function seconds2time($seconds)
 {
+  $seconds = gd_int($seconds);
   return floor($seconds/60).":".sprintf("%02d",($seconds%60));
 }
 
 function full_mp3_fname($fname)
 # returns the full path+filename for the mp3 file 'fname'
 {
-  if (strlen($fname)>=8){
-    #exec("/bin/ls /home/music/??/".$fname, $fullname);
-    #exec("/bin/ls /srv/www/htdocs/music/??/".$fname, $fullname);
-    #exec("/bin/ls /volume1/web/music/??/".$fname, $fullname);
-    exec("/bin/ls /var/www/html/music/??/".$fname, $fullname);
-    #$fullname[0] = substr( $fullname[0], strlen( "/srv/www/htdocs" ));
-    #$fullname[0] = substr( $fullname[0], strlen( "/volume1/web" ));
-    $fullname[0] = substr( $fullname[0], strlen( "/var/www/html" ));
-    return $fullname[0];
+  if (strlen(gd_str($fname))>=8){
+    #@exec("/bin/ls /home/music/??/".$fname, $fullname);
+    #@exec("/bin/ls /srv/www/htdocs/music/??/".$fname, $fullname);
+    #@exec("/bin/ls /volume1/web/music/??/".$fname, $fullname);
+    @exec("/bin/ls /var/www/html/music/??/".$fname, $fullname);
+    #$fullname[0] = substr( $fullname[0] ?? 
+    #$fullname[0] = substr( $fullname[0] ?? 
+    $fullname[0] = substr( $fullname[0] ?? '', strlen( "/var/www/html" ));
+    return $fullname[0] ?? '';
   }
   else{
     return "";
@@ -1383,15 +1434,15 @@ function show_trackrow($row,
 {
 
 
-$yearstr = $row["year"];
+$yearstr = gd_str($row["year"]);
 # Jahreszahl vierstellig anzeigen
 
-#    if (strcmp($playtp, "dl")==0){$mp3path = full_mp3_fname($row["mp3file"]);}
-    if (strcmp($playtp, "dl")==0){
-        $anz_slash = substr_count($mp3dir, "/");
-        $teil_mp3 = explode("/", $mp3dir);
-        $verz_l = array($teil_mp3[$anz_slash]);
-        $mp3verz = implode("", $verz_l);
+#    if (strcmp(gd_str($playtp), "dl")==0){$mp3path = full_mp3_fname($row["mp3file"]);}
+    if (strcmp(gd_str($playtp), "dl")==0){
+        $anz_slash = substr_count(gd_str($mp3dir), "/");
+        $teil_mp3 = explode("/", gd_str($mp3dir));
+      $verz_l = array($teil_mp3[$anz_slash] ?? '', "/" , $field ?? '');
+        $mp3verz = implode("", gd_arr($verz_l));
         $mp3path = $mp3verz."/".$row["mp3file"];
         
      #$yearstr = $mp3path;
@@ -1405,11 +1456,11 @@ $yearstr = $row["year"];
 	}
     if ($showgenre){
 	  print "<td class=\"trklst\">&nbsp;";
-      if (strlen($row["genre1"])>0){
+      if (strlen(gd_str($row["genre1"]))>0){
 	    print_genre_string($row["genre1"]);
 	  }
-      if (strlen($row["genre1"])>0 && strlen($row["genre2"])>0){print "<br>";}
-      if (strlen($row["genre2"])>0){
+      if (strlen(gd_str($row["genre1"]))>0 && strlen(gd_str($row["genre2"]))>0){print "<br>";}
+      if (strlen(gd_str($row["genre2"]))>0){
 	    print "&nbsp;";
 	    print_genre_string($row["genre2"]);
 	  }
@@ -1437,7 +1488,7 @@ $yearstr = $row["year"];
     if ($showdownload){
       # Download mp3
 	  # types: playtp = dl, rd, df, dl or dr
-      if (strcmp($playtp, "dl")==0){
+      if (strcmp(gd_str($playtp), "dl")==0){
 	    print "<td class=\"trklst\">&nbsp;<a href=\"".$mp3path."\">"
 		     ."<img border=\"0\" src=\"img/dl.gif\" alt=\"Download\"  title=\"$output080\"></a>
 			 &nbsp;&nbsp;&nbsp;";
@@ -1460,7 +1511,7 @@ $yearstr = $row["year"];
   if ( ! $link )
       die( "Keine Verbindung zu MySQL" );
       $erg_lyric = mysqli_query( $link ,"select lyrics from tracks where id = $row[id] && lyrics IS NOT NULL");
-      $anz_lyric = mysqli_num_rows( $erg_lyric );
+      $anz_lyric = gd_num_rows($erg_lyric);
       if ($anz_lyric > 0)
         {
         #print "&nbsp; &nbsp; &nbsp;<a href=\"lyric.php?id=$row[id]\" target=\"$row[id]\">";
@@ -1490,11 +1541,11 @@ function show_onlytrackrow($row,
 					   $showedit, $showdownload, $playtp, $showtoplaylist, $output079, $output080, $titel_nummer)
 {
 #	if (strlen($row["year"])>2){ $yearstr = "'".substr($row["year"], 2, 2);}
-#	else                       { $yearstr = $row["year"];}
-$yearstr = $row["year"];
+#	else                       { $yearstr = gd_str($row["year"]);}
+$yearstr = gd_str($row["year"]);
 # Jahreszahl vierstellig anzeigen
 
-    if (strcmp($playtp, "dl")==0){$mp3path = full_mp3_fname($row["mp3file"]);}
+    if (strcmp(gd_str($playtp), "dl")==0){$mp3path = full_mp3_fname($row["mp3file"]);}
 
     if ($showartist){
       print "<td class=\"trklst\">&nbsp;".$row["artist"]." </td>";
@@ -1504,11 +1555,11 @@ $yearstr = $row["year"];
 	}
     if ($showgenre){
 	  print "<td class=\"trklst\">&nbsp;";
-      if (strlen($row["genre1"])>0){
+      if (strlen(gd_str($row["genre1"]))>0){
 	    print_genre_string($row["genre1"]);
 	  }
-      if (strlen($row["genre1"])>0 && strlen($row["genre2"])>0){print "<br>";}
-      if (strlen($row["genre2"])>0){
+      if (strlen(gd_str($row["genre1"]))>0 && strlen(gd_str($row["genre2"]))>0){print "<br>";}
+      if (strlen(gd_str($row["genre2"]))>0){
 	    print "&nbsp;";
 	    print_genre_string($row["genre2"]);
 	  }
@@ -1536,54 +1587,53 @@ $yearstr = $row["year"];
     if ($showdownload){
       # Download mp3
 	  # types: playtp = dl, rd, df, dl or dr
-      if (strcmp($playtp, "dl")==0){
+      if (strcmp(gd_str($playtp), "dl")==0){
 
         print "<td class=\"trklst\">&nbsp;";
 
-      $link =  mysql_connect( MYSQL_HOST, MYSQL_USER );
+      $link =  mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
       if ( ! $link )
           die( "Keine Verbindung zu MySQL" );
-      $abfrage = "SELECT mp3file FROM tracks WHERE id = $rowid ";
-      $recset = mysql_db_query ("GiantDisc", $abfrage);
+      $rowid = $row["id"] ?? '';       $abfrage = "SELECT mp3file FROM tracks WHERE id = $rowid ";
+      $recset = mysqli_query( $link, $abfrage);
 
       $sql = "select lyrics from tracks where id = $row[id] && lyrics IS NOT NULL";
-      $erg_lyric = mysql_db_query( "GiantDisc", $sql);
-      $anz_lyric = mysql_num_rows( $erg_lyric );
+      $erg_lyric = mysqli_query( $link, $sql);
+      $anz_lyric = gd_num_rows($erg_lyric);
       if ($anz_lyric > 0)
         {
         #print "&nbsp; &nbsp; &nbsp;<a href=\"lyric.php?id=$row[id]\" target=\"$row[id]\">";
         print "&nbsp; &nbsp; &nbsp;<a href=\"javascript:popUp1('lyric.php?id=$row[id]')\">";       
         print "<img border=\"0\" src=\"img/lyric_button.png\" alt=\"Lyric\" title=\"Lyric\"></a>";
         }      
-      mysql_free_result($recset);
-      mysql_close( $link );
+      gd_free($recset);
+      mysqli_close($link);
       
 #      print $erg_lyric;
 #      print $row["id"];
       $rowid = $row["id"];
             
-      $link =  mysql_connect( MYSQL_HOST, MYSQL_USER );
+      $link =  mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
       if ( ! $link )
           die( "Keine Verbindung zu MySQL" );
-      
-      $abfrage = "SELECT mp3file FROM tracks WHERE id = $rowid ";
-      $recset = mysql_db_query ("GiantDisc", $abfrage);
-#      $anz_row = mysql_num_rows( $recset );
+      $rowid = $row["id"] ?? '';       $abfrage = "SELECT mp3file FROM tracks WHERE id = $rowid ";
+      $recset = mysqli_query( $link, $abfrage);
+#      $anz_row = gd_num_rows($recset);
 #      print "$anz_row<br>";
 
-      while($row = mysql_fetch_object($recset))
+      $mp3file = '';       while($row = gd_fetch_object($recset))
         {
         $mp3file = $row->mp3file;
-        $mp3file = explode(".", $mp3file);
-        $mp3file = $mp3file[0];
-        $titel_nummer = explode(".", $titel_nummer);
-        $titel_nummer = $titel_nummer[0];
+        $mp3file = explode(".", gd_str($mp3file));
+        $mp3file = $mp3file[0] ?? '';
+        $titel_nummer = explode(".", gd_str($titel_nummer));
+        $titel_nummer = $titel_nummer[0] ?? '';
 #        print " $mp3file";
 #        print " $titel_nummer";        
         }
 
-      mysql_free_result($recset);
-      mysql_close( $link );
+      gd_free($recset);
+      mysqli_close($link);
       
       if ($mp3file == $titel_nummer)
           print "</td><td> &nbsp; <img border=\"0\" src=\"img/aktiv_track.gif\" height=\"16\" alt=\"aktiv track\" title=\"aktiv track\"></td>";
@@ -1611,13 +1661,13 @@ function set_get_cookie($updatecookie, $cookiename, $defaultval, $cookievars)
 {
   global $expire_sec;
 
-  if (isset($updatecookie) and strlen($updatecookie)>0){
+  if (isset($updatecookie) and strlen(gd_str($updatecookie))>0){
     setcookie ($cookiename, $updatecookie,time()+$expire_sec, "/~music/");
     return $updatecookie;
   }
   else{
-    if (strlen ($cookievars[$cookiename]) >0 ){
-      return $cookievars[$cookiename];
+    if (strlen (gd_str($cookievars[$cookiename] ?? '')) >0 ){
+      return $cookievars[$cookiename] ?? '';
     }
     else{
       setcookie ($cookiename, $defaultval,time()+$expire_sec, "/~music/");
@@ -1653,7 +1703,7 @@ function set_get_cbx_cookie($newsettings, $cookiename, $cookieval, $cookievars)
 
 function dl_make_filelist()
 {
-#  exec("/bin/ls /home/music/??/*0.mp3 > tmp/filelist.txt");
+#  @exec("/bin/ls /home/music/??/*0.mp3 > tmp/filelist.txt");
 
 #  $fp = fopen ("tmp/file2.txt", "w");
 #  fwrite ($fp, "This is my string\n");
@@ -1667,20 +1717,20 @@ function dl_make_filelist()
 function p_playlist($output080, $output132, $bashplayer, $output133, $b_player, $xspf, $output134){
 
 $abfrage =  "SELECT id, title FROM playlist ORDER BY id";
-#$ergebnis = mysql_db_query( "GiantDisc", $abfrage );
-#$anz_felder = mysql_num_fields( $ergebnis );
+#$ergebnis = mysqli_query($link, $abfrage );
+#$anz_felder = gd_num_fields($ergebnis);
 $con = mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
 $ergebnis = mysqli_query( $con, $abfrage);
-#  if (mysql_affected_rows()>0){print "<hr noshade>";}else{print "<p>&nbsp;</p>";}
-  print("<p><small><b>".mysqli_affected_rows($con)." machting playlists</b></small></p>");
+#  if (gd_affected($link)>0){print "<hr noshade>";}else{print "<p>&nbsp;</p>";}
+  print("<p><small><b>".gd_affected($con)." machting playlists</b></small></p>");
 
 
 echo("<table><tr><td>&nbsp; &nbsp;</td><td><small><B>No.</B></small></td><td>&nbsp;</td><td><small><B>Playlistname</B></small></td></tr>");
 
 $a = 0;
-while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+while ( $datensatz = gd_fetch_row($ergebnis) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		  {
 			if ($a == 0)
 				{
@@ -1733,19 +1783,19 @@ where trackid = id
 and playlist = $pl_id
 order by tracknumber ASC";
 $ergebnis = mysqli_query( $link , $abfrage );
-$anz_felder = mysqli_num_fields( $ergebnis );
+$anz_felder = gd_num_rows($ergebnis);
 
-  #if (mysql_affected_rows()>0){print "<hr noshade>";}else{print "<p>&nbsp;</p>";}
-  print("<p><small><b>".mysqli_affected_rows( $link )." tracks in $title</b></small></p>");
+  #if (gd_affected($link)>0){print "<hr noshade>";}else{print "<p>&nbsp;</p>";}
+  print("<p><small><b>".gd_affected($link)." tracks in $title</b></small></p>");
 
 echo("<table><tr><td><small><b>Track-No.</b></small></td><td><small><b>Artist</b></small></td><td><small><b>Title</b></small></td><td>&nbsp;</td></tr>");
 
 $a = 0;
 #$track = 1;
 $evenln = 1;
-while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+while ( $datensatz = gd_fetch_row($ergebnis) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		  {
 		  switch ($a)
 		  	{
@@ -1774,16 +1824,16 @@ while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
 				print "<td class=\"trklst\">$track</td><td class=\"trklst\">$artist</td><td class=\"trklst\">$title</td>";
 				$abfrage = "select trackid from playlistitem where $pl_id = playlist"; 
         $test_reihe = mysqli_query( $link , $abfrage);
-				$anz_row = mysqli_num_rows( $test_reihe );
+				$anz_row = gd_num_rows($test_reihe);
 
         $sql = "select mp3file from tracks where $feld = id";
 				$recset = mysqli_query( $link , $sql );
-				while ( $datastep = mysqli_fetch_row( $recset ) )
+				while ( $datastep = gd_fetch_row($recset) )
 					{
-					foreach ( $datastep as $field )
+					foreach (gd_arr($datastep) as $field )
 						{
-						$httphost = $_SERVER["HTTP_HOST"];
-						$l = strlen($PATH_ABSOLUTE_mp3) - 3;
+  $httphost = $_SERVER["HTTP_HOST"] ?? '';
+						$l = strlen(gd_str($PATH_ABSOLUTE_mp3)) - 3;
 						$mp3path = substr($PATH_ABSOLUTE_mp3,$l,3);
 						print "<td class=\"trklst\"><a href=\"http://$httphost/music";
 						print "$mp3path";
@@ -1798,10 +1848,10 @@ while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
 			       #$artist=$row["artist"];
 			       $laenge=0;
 
-        $anz_slash = substr_count($mp3dir, "/");
-        $teil_mp3 = explode("/", $mp3dir);
-        $verz_l = array( $teil_mp3[$anz_slash], "/", $field);
-        $mp3verz = implode("", $verz_l);
+        $anz_slash = substr_count(gd_str($mp3dir), "/");
+        $teil_mp3 = explode("/", gd_str($mp3dir));
+      $verz_l = array( $teil_mp3[$anz_slash] ?? '', "/", $field);
+        $mp3verz = implode("", gd_arr($verz_l));
 			       print "<a href=\"gd2xspf.php?mp3path=$mp3verz&title=$title&artist=$artist&laenge=$laenge"."\">";
 			       
              print "<img border=\"0\" src=\"img/xspf.png\" width=\"16\" alt=\"Download\" title=\"$output134\"></a>";
@@ -1809,7 +1859,7 @@ while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
 
             #print "$feld";
             $erg_lyric = mysqli_query( $link ,"select lyrics from tracks where id = $feld && lyrics IS NOT NULL");
-            $anz_lyric = mysqli_num_rows( $erg_lyric );
+            $anz_lyric = gd_num_rows($erg_lyric);
             if ($anz_lyric > 0)
               {
               print "&nbsp; &nbsp; &nbsp;<a href=\"javascript:popUp1('lyric.php?id=$feld')\">";       
@@ -1817,7 +1867,7 @@ while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
               }                      
 
             print "</td>";
-        if (strcmp($tool, "edit")==0)
+        if (strcmp(gd_str($tool), "edit")==0)
             {
             print "<td class=\"trklst\">&nbsp; &nbsp;";
             if ($track > 1)
@@ -1846,7 +1896,7 @@ while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
 					}
 
 				#print "<img border=\"0\" src=\"img/dl.gif\" alt=\"Download\" title=\"$output080\"></a></td></tr>";
-				mysqli_free_result($recset);
+				gd_free($recset);
 				$a = 0;
 #				$track++;
 				$evenln = 1-$evenln;
@@ -1855,7 +1905,7 @@ while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
 		  }
     }
 echo("</table>");
-mysqli_free_result($ergebnis);
+gd_free($ergebnis);
 
 return 0;
 }
@@ -1865,22 +1915,22 @@ return 0;
 
 function p_append($id, $output048, $output049){
 
-$link =  $link =  mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
+$link =  mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
   if ( ! $link )
       die( "Keine Verbindung zu MySQL" );
 echo("<h1>Append Title to Playlist</h1><hr noshade>");
 
 $abfrage =  "SELECT artist, title FROM tracks where id=$id";
 $ergebnis = mysqli_query( $link , $abfrage );
-$anz_felder = mysqli_num_fields( $ergebnis );
+$anz_felder = gd_num_rows($ergebnis);
 
 print "<FORM METHOD='GET' ACTION='newpl.php'>
 <table border='0' cellspacing='0'><tr><td class='trklst'>&nbsp;<b>$output048</b>";
 
 $a = 0;
-while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+while ( $datensatz = gd_fetch_row($ergebnis) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		  {
 			if ($a == 0)
 				{
@@ -1902,20 +1952,20 @@ print "&nbsp;&nbsp;<b>$output049</b></td>
 &nbsp;<INPUT TYPE='submit' VALUE='create'>
 &nbsp;&nbsp;&nbsp;</td>
 </tr></table></FORM><hr noshade>";
-mysqli_free_result($ergebnis);
+gd_free($ergebnis);
 
 
 
 
 $ergebnis = mysqli_query( $link , "SELECT id, title FROM playlist" );
-$anz_felder = mysqli_num_fields( $ergebnis );
+$anz_felder = gd_num_rows($ergebnis);
 
 echo("<table><tr><td>&nbsp;</td><td>&nbsp; &nbsp;</td><td><small><B>No.</B></small></td><td>&nbsp;</td><td><small><B>Playlistname</B></small></td></tr>");
 
 $a = 0;
-while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+while ( $datensatz = gd_fetch_row($ergebnis) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		  {
 			if ($a == 0)
 				{
@@ -1932,7 +1982,7 @@ while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
 		  }
     }
 echo("</table>");
-mysqli_free_result($ergebnis);
+gd_free($ergebnis);
 mysqli_close( $link );
 }
 
@@ -1946,9 +1996,9 @@ $ergebnis = mysqli_query( $link , "select tracknumber from playlistitem where pl
 
 $a=0;
 $b=0;
-while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+while ( $datensatz = gd_fetch_row($ergebnis) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		  {
 			$a = $feld;
 			if ($a > $b)
@@ -1957,7 +2007,7 @@ while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
     }
 $b++;
 
-mysqli_free_result($ergebnis);
+gd_free($ergebnis);
 
 $ergebnis = mysqli_query( $link , "insert into playlistitem (playlist, tracknumber, trackid)
 values ($pl_id, $b, $id)" );

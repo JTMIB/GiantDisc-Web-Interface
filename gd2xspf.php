@@ -14,15 +14,15 @@
 include "control_web.inc";
 
 ## Variablen aus Browser-Zeile
-$mp3path=$_GET['mp3path'];
-$title=$_GET['title'];
-$artist=$_GET['artist'];
-$laenge=$_GET['laenge'];
+$mp3path=$_GET['mp3path'] ?? null;
+$title=$_GET['title'] ?? null;
+$artist=$_GET['artist'] ?? null;
+$laenge=$_GET['laenge'] ?? null;
 
-$httphost = $_SERVER["HTTP_HOST"];
+$httphost = $_SERVER["HTTP_HOST"] ?? null;
 
 ### Dynamically send file
-if (strcmp($playtp, "df")==0){
+if (strcmp(gd_str($playtp), "df")==0){
   header("Content-Type: audio/xspf");
   header("Content-Location: ".$mp3path);
   #header("Content-Disposition: filename=".$mp3path);
@@ -44,9 +44,9 @@ if (strcmp($playtp, "df")==0){
   print "			<location>";
   
         $anz_slash = substr_count($mp3dir, "/");
-        $teil_mp3 = explode("/", $mp3dir);
+        $teil_mp3 = explode("/", gd_str($mp3dir));
         $verz_l = array( "/", $teil_mp3[$anz_slash - 1], "/", $mp3path);
-        $mp3verz = implode("", $verz_l);  
+        $mp3verz = implode("", gd_arr($verz_l));  
   
   print "http://$httphost"."$mp3verz";
   print "</location>"."\n";
@@ -70,7 +70,7 @@ exit;
 
 ##########################################################################
 ### Redirect to mp3 file
-if (strcmp($playtp, "rd")==0){
+if (strcmp(gd_str($playtp), "rd")==0){
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>

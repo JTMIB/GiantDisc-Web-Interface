@@ -14,12 +14,12 @@
 include "control_web.inc";
 include "gdwebdef.php";
 
-$file=$_GET['file'];
-$comand=$_GET['comand'];
-
-$playtp = set_get_cookie($setplaytp, "playtp", "dl", $HTTP_COOKIE_VARS);
+$file=$_GET['file'] ?? null;
+$comand=$_GET['comand'] ?? null;
+$playtp = set_get_cookie($_GET['setplaytp'] ?? null, "playtp", "dl", $_COOKIE);
 
 print_header ("settings", "", "$cgi_dir", "$char_set", $output135, $output136, $output137, $output138);
+$sel = '';
 
 print "<br><hr><br>";
 #######################################################################################
@@ -48,7 +48,7 @@ if ($comand == "fullrestore")
 $mysqlImportFilename ="backup/$file";
 $mysqlHostName = MYSQL_HOST;
 #print "$mysqlHostName<br>";
-$teile = explode(":", $mysqlHostName);
+$teile = explode(":", gd_str($mysqlHostName));
 #print "$teile[0]<br>";
 $mysqlHostName = $teile[0];
 #print "$mysqlHostName<br>";
@@ -56,7 +56,9 @@ $mysqlHostName = $teile[0];
 //Bei den folgenden Punkten bitte keine Änderung durchführen
 //Import der Datenbank und Ausgabe des Status
 $command='mysql -h' .$mysqlHostName .' -u' .MYSQL_USER .' -p' .MYSQL_PASS .' ' .MYSQL_DB .' < ' .$mysqlImportFilename;
-exec($command,$output,$worked);
+$output = array();
+$worked = 0;
+@exec($command,$output,$worked);
 switch($worked){
   case 0:
 #    echo 'Die Daten aus der Datei <b>' .$file .'</b> wurden erfolgreich in der Datenbank <b>' .MYSQL_DB .'</b> eingespielt';

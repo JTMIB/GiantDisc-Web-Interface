@@ -11,10 +11,11 @@
  * veröffentlicht, weitergeben und/oder modifizieren (Version 3 der Lizenz).
  */
  
-include "gdweb.php";
+include "control_web.inc";
+$id = $_GET['id'] ?? null;
 include "gdwebdef.php";
 
-print_header ("","");
+print_header ("settings", "", "$cgi_dir", "$char_set", $output135, $output136, $output137, $output138);
 ?>
 
 <h2>Edit Track Details</h2>
@@ -173,12 +174,12 @@ function show_selform($artist, $title, $genre1, $genre2,
 
 if(isset($id)){
   # open data source
-  $ds = mysql_connect();	
+  $link = mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);	
 
 #  print("<table border=\"0\" cellspacing=\"0\">\n");
-  $recset = mysql_db_query ("GiantDisc", "SELECT * FROM tracks WHERE id=".$id);
+  $recset = mysqli_query($link, "SELECT * FROM tracks WHERE id=".$id);
 
-  if($row = mysql_fetch_array($recset)) {
+  if($row = gd_fetch_array($recset)) {
     show_selform($row["artist"], $row["title"], $row["genre1"], $row["genre2"], 
 				$row["year"], $row["lang"], $row["type"], $row["rating"], $row["length"], 
 				$row["source"], $row["sourceid"], $row["tracknb"], $row["mp3file"], $row["bitrate"], 
@@ -186,7 +187,7 @@ if(isset($id)){
 				$row["bpm"], $row["lyrics"], $row["created"], $row["modified"], $row["backup"],
 				$row["id"]);
   }
-  mysql_free_result($recset);
+  gd_free($recset);
 }
 ?>
 

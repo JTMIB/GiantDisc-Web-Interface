@@ -618,12 +618,17 @@ Noch ein paar Links:
             Bei der Gelegenheit habe ich ein paar Dateien gefunden von den ich nicht sicher bin,
             ob sie noch benötigt werden.
             
-            admin.php kann schon Mal weg.
-            gdweb-settings.php kann schon Mal weg.
-            gdwebdef.php kann schon Mal weg.
+            admin.php           -> kann schon Mal weg.
+            gdweb-settings.php  -> kann schon Mal weg.
+            gdwebdef.php        -> wird wohl noch gebraucht. Mindestens für die Suche in der index.php
+            idtag_set.php gut?  -> Da gab es wohl mal eine Idee.
               
             Die Sprache auf englisch gestellt.
             Den Hintergrund auf weiß gestellt.
+            
+--------------------------------------------------------------------
+10.11.2026  Mit Hilfe von DeepSeek habe ich zwischen November und Oktober die ganzen Warnings beseitigt
+            und ausgiebig getestet.
             
 --------------------------------------------------------------------
 
@@ -666,7 +671,7 @@ Offene Punkte / Wunschliste:
   Vielleicht macht eine eigene Tabelle sinn.
   Vielleicht Links zu Wikipedia setzen
 
-- Wofür ist idtag_set.php gut?      -> Da gab es wohl mal eine Idee.
+
 
   
 

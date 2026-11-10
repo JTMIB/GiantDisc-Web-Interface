@@ -16,7 +16,7 @@ include "control_web.inc";
 
 print_header ("record", "", "$cgi_dir", "$char_set", $output135, $output136, $output137, $output138);
 
-#$dbh = mysql_connect();	
+#$dbh = mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);	
 
 
 ### Show first level:

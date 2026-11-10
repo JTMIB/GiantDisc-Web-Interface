@@ -13,30 +13,31 @@
  
 include "control_web.inc";
 include "gdwebdef.php";
-
-$playtp = set_get_cookie($setplaytp, "playtp", "dl", $HTTP_COOKIE_VARS);
+$playtp = set_get_cookie($_GET['setplaytp'] ?? null, "playtp", "dl", $_COOKIE);
 
 print_header ("browse", "", "$cgi_dir", "$char_set", $output135, $output136, $output137, $output138);
 
 
-#  $link =  mysql_connect( MYSQL_HOST, MYSQL_USER, MYSQL_PASS );
+#  $link =  mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
   $link =  mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
   if ( ! $link )
       die( "Keine Verbindung zu MySQL" );
 
 ## Variablen aus Browser-Zeile
-$l0=$_GET['l0']; 
-$l1=$_GET['l1'];
-$ar=$_GET['ar']; 
-$albid=$_GET['albid'];
-$shgn=$_GET['shgn'];
-$pg=$_GET['pg'];
-$pl_id=$_GET['pl_id'];
-$title=$_GET['title'];
-$tool=$_GET['tool'];
-$id=$_GET['id'];
-$source=$_GET['source'];
-$evaluation=$_GET['evaluation'];
+$l0=$_GET['l0'] ?? null; 
+$l1=$_GET['l1'] ?? null;
+$ar=$_GET['ar'] ?? null; 
+$albid=$_GET['albid'] ?? null;
+$shgn=$_GET['shgn'] ?? null;
+$pg=$_GET['pg'] ?? null;
+$rating=$_GET['rating'] ?? null;
+$pl_id=$_GET['pl_id'] ?? null;
+$title=$_GET['title'] ?? null;
+$tool=$_GET['tool'] ?? null;
+$id=$_GET['id'] ?? null;
+$source=$_GET['source'] ?? null;
+$evaluation=$_GET['evaluation'] ?? null;
+$sel = '';
 
 
 #######################################################################################
@@ -45,24 +46,25 @@ $trunclen = 30; # characters
 
 function write_genres($prefix, $selgenre, $shgenre)
 # displays a part of the genre tree.
-# '$selgenre' specifies, which genre is selected (will be highlighted).
-# '$shgenre' specifies the deepest genre node in the hierarchy that should be opened/printed
+# 'selgenre' specifies, which genre is selected (will be highlighted).
+# 'shgenre' specifies the deepest genre node in the hierarchy that should be opened/printed
 {
+  $l1 = $_GET['l1'] ?? '';
   $whereclause = " id LIKE '_' "; # always show the first level
-  $i = strlen($shgenre);
+  $i = strlen(gd_str($shgenre));
   while ($i >= 1){
-    $whereclause .= " OR id LIKE '".substr($shgenre, 0, $i)."_' ";
+    $whereclause .= " OR id LIKE '".substr(gd_str($shgenre), 0, $i)."_' ";
     $i--;
   }
 
   #$qrystr = "SELECT * FROM genre WHERE $whereclause ORDER BY id";
-  #$recset = mysql_db_query ("GiantDisc", $qrystr);
+  #$recset = mysqli_query($link, $qrystr);
   $con = mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
   $recset = mysqli_query( $con, "SELECT * FROM genre WHERE $whereclause ORDER BY id");
   print "\n<div class='genrebox'>";
-  while($row = mysqli_fetch_array($recset)) {
+  while($row = gd_fetch_array($recset)) {
     print str_repeat("&nbsp;", (strlen($row["id"])-1)*4);  # indents
-    $pos = strpos($shgenre, $row["id"]);  # is current id a prefix of $shgenre?
+    $pos = strpos(gd_str($shgenre), $row["id"]);  # is current id a prefix of $shgenre?
     if ($pos!==false and $pos==0){# are we in the open branch?
       $imgdir = "tri-d.png";
       $opengen = substr ($row["id"], 0, strlen($row["id"])-1); # chop off last char
@@ -84,8 +86,8 @@ function write_genres($prefix, $selgenre, $shgenre)
 function write_artistlink($prefix, $artist)
 {
   global $trunclen;
-  if (strlen($artist)>$trunclen){
-    $art = substr($artist, 0, $trunclen);
+  if (strlen(gd_str($artist))>$trunclen){
+    $art = substr(gd_str($artist), 0, $trunclen);
     $appendix="..";
   }
   else{
@@ -131,16 +133,16 @@ $qrystr = ""; # clear query string
 if (isset($l0)){
 
   ### Tracks by Artist
-  if (strcmp($l0, "tr-ar")==0){
+  if (strcmp(gd_str($l0), "tr-ar")==0){
     print "<h4>$output126</h4>";
     write_alphabet("browse.php?l0=tr-ar&l1=", $l1);
     if (isset($l1)){ # level 1 specified?
       $tempquery = "SELECT DISTINCT artist FROM tracks WHERE artist LIKE '$l1%' ORDER BY artist";
-      #$recset = mysql_db_query ("GiantDisc", $tempquery);
+      #$recset = mysqli_query($link, $tempquery);
       $con = mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
       $recset = mysqli_query( $con, $tempquery);
-      if (mysqli_affected_rows($con)>0){print("<p><small>".mysqli_affected_rows($con)." artists</small><br>");}
-      while($row = mysqli_fetch_array($recset)) {
+      if (gd_affected($con)>0){print("<p><small>".gd_affected($con)." artists</small><br>");}
+      while($row = gd_fetch_array($recset)) {
 	    write_artistlink("browse.php?l0=tr-ar&l1=$l1&ar=", $row["artist"]);
       }
 
@@ -152,7 +154,7 @@ if (isset($l0)){
 
 
   ### Tracks by Title
-  if (strcmp($l0, "tr-ti")==0){
+  if (strcmp(gd_str($l0), "tr-ti")==0){
     print "<h4>$output125</h4>";
     write_alphabet("browse.php?l0=tr-ti&l1=", "");
 	if (isset($l1)){ # level 1 specified?
@@ -162,37 +164,37 @@ if (isset($l0)){
 
 
   ### Tracks by Genre
-  if (strcmp($l0, "tr-gn")==0){
+  if (strcmp(gd_str($l0), "tr-gn")==0){
     print "<h4>$output124</h4>";
     write_genres("browse.php?l0=tr-gn&l1=", $l1, $shgn);
-	if (isset($l1) and strlen($l1)>0 ){ # level 1 specified?
+	if (isset($l1) and strlen(gd_str($l1))>0 ){ # level 1 specified?
       $qrystr = "SELECT * FROM tracks WHERE genre1 LIKE '$l1%' or genre2 LIKE '$l1%' ORDER BY artist ";
 	}
   }
 
 
   ### Albums by Artist
-  if (strcmp($l0, "al-ar")==0){
+  if (strcmp(gd_str($l0), "al-ar")==0){
     print "<h4>$output122</h4>";
     write_alphabet("browse.php?l0=al-ar&l1=", $l1);
     if (isset($l1)){ # level 1 specified?
       #$tempquery = "SELECT DISTINCT artist FROM album WHERE artist LIKE '$l1%' ORDER BY artist";
-      #$recset = mysql_db_query ("GiantDisc", $tempquery);
+      #$recset = mysqli_query($link, $tempquery);
       
       $con = mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
       $recset = mysqli_query( $con, "SELECT DISTINCT artist FROM album WHERE artist LIKE '$l1%' ORDER BY artist");
       
-      if (mysqli_affected_rows($con)>0){print("<p><small>".mysqli_affected_rows($con)." artists</small><br>");}
-      while($row = mysqli_fetch_array($recset)) {
+      if (gd_affected($con)>0){print("<p><small>".gd_affected($con)." artists</small><br>");}
+      while($row = gd_fetch_array($recset)) {
 	    write_artistlink("browse.php?l0=al-ar&l1=$l1&ar=", $row["artist"]);
       }
 
 	  if (isset($ar)){ # artist / level 2 specified?
         $tempquery = "SELECT * FROM album WHERE artist LIKE '$ar%' ORDER BY title";
         $recset = mysqli_query ( $con , $tempquery);
-        if (mysqli_affected_rows( $con )>0){print("<p><small>".mysqli_affected_rows( $con )." albums</small><br>");}
+        if (gd_affected($con)>0){print("<p><small>".gd_affected($con)." albums</small><br>");}
         print "<table borders=\"0\">";
-        while($row = mysqli_fetch_array($recset)) {
+        while($row = gd_fetch_array($recset)) {
 
 	      schreibe_albumlink("browse.php?l0=al-ar&l1=$l1&ar=$ar&albid=", $htdocs, $imagedir, $row, $showedit, $output132, $output133, $b_player, $bashplayer, $xspf, $output134);
         }
@@ -207,17 +209,17 @@ if (isset($l0)){
 
 
   ### Albums by Title
-  if (strcmp($l0, "al-ti")==0){
+  if (strcmp(gd_str($l0), "al-ti")==0){
     print "<h4>$output121</h4>";
     write_alphabet("browse.php?l0=al-ti&l1=", $l1);
     if (isset($l1)){ # level 1 (initial char) specified?
       #$tempquery = "SELECT * FROM album WHERE title LIKE '$l1%' ORDER BY title";
-      #$recset = mysql_db_query ("GiantDisc", $tempquery);
+      #$recset = mysqli_query($link, $tempquery);
       $con = mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
       $recset = mysqli_query( $con, "SELECT * FROM album WHERE title LIKE '$l1%' ORDER BY title");
-      if (mysqli_affected_rows($con)>0){print("<p><small>".mysqli_affected_rows($con)." albums</small><br>");}
+      if (gd_affected($con)>0){print("<p><small>".gd_affected($con)." albums</small><br>");}
       print "<table borders=\"0\">";
-      while($row = mysqli_fetch_array($recset)) {
+      while($row = gd_fetch_array($recset)) {
       schreibe_albumlink("browse.php?l0=al-ti&l1=$l1&albid=", $htdocs, $imagedir, $row, $showedit, $output132, $output133, $b_player, $bashplayer, $xspf, $output134);
 
       }
@@ -231,15 +233,15 @@ if (isset($l0)){
 
 
   ### Albums by Genre
-  if (strcmp($l0, "al-gn")==0){
+  if (strcmp(gd_str($l0), "al-gn")==0){
     print "<h4>$output120</h4>";
     write_genres("browse.php?l0=al-gn&l1=", $l1, $shgn);
-	if (isset($l1) and strlen($l1)>0 ){ # level 1 specified?
+	if (isset($l1) and strlen(gd_str($l1))>0 ){ # level 1 specified?
       $tempquery = "SELECT * FROM album WHERE genre LIKE '$l1%' ORDER BY artist";
       $recset = mysqli_query ( $link, $tempquery);
-      print("<p><small>".mysqli_affected_rows( $link)." albums</small><br>");
+      print("<p><small>".gd_affected($link)." albums</small><br>");
       print "<table borders=\"0\">";
-      while($row = mysqli_fetch_array($recset)) {
+      while($row = gd_fetch_array($recset)) {
 	    schreibe_albumlink("browse.php?l0=al-gn&l1=$l1&shgn=$shgn&albid=", $htdocs, $imagedir, $row, $showedit, $output132, $output133, $b_player, $bashplayer, $xspf, $output134);
       }
       print "</table>";
@@ -251,7 +253,8 @@ if (isset($l0)){
   }
 
   ### all Albums
-  if (strcmp($l0, "allalb")==0){
+  if (strcmp(gd_str($l0), "allalb")==0){
+    $ausgabe = '';
     if ($source == "0")
         $ausgabe=" - $output110";
     if ($source == "1")
@@ -352,13 +355,13 @@ if (isset($l0)){
      }
 	    }
 	    
-      #$recset = mysql_db_query ("GiantDisc", $tempquery);
+      #$recset = mysqli_query($link, $tempquery);
       $con = mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
       $recset = mysqli_query( $con, $tempquery);
-      if (mysqli_affected_rows($con)>0){print("<p><small>".mysqli_affected_rows($con)." $output117</small><br>");}
+      if (gd_affected($con)>0){print("<p><small>".gd_affected($con)." $output117</small><br>");}
       print "<small>$output116";
 
-	  $anz_reihen = mysqli_affected_rows($con);
+	  $anz_reihen = gd_affected($con);
 	  $a = 0;
 	  $b = 1; # erste Seite
 	  $showmax = 50;
@@ -517,7 +520,7 @@ print"<a href=\"browse.php?l0=allalb&pg=1&source=$source&evaluation=1\"><span cl
       print "<hr>";
 
       print "<table borders=\"0\">";
-      while($row = mysqli_fetch_array($recset)) {
+      while($row = gd_fetch_array($recset)) {
 		$albumrecord = $row;
 #		print "$albumrecord[1]<br>";
 #		print "$showedit<br>";
@@ -531,12 +534,12 @@ print"<a href=\"browse.php?l0=allalb&pg=1&source=$source&evaluation=1\"><span cl
 		print "<tr>";  #<tr class="lnodd"   ...even>
 ### Favoriten Beginn
 		  $abfrage_stern = mysqli_query( $link,"SELECT evaluation FROM album_fav WHERE cddbid LIKE '%$albumrecord[cddbid]%'" );
-		  $anz_reihen_stern = mysqli_num_rows( $abfrage_stern );
+		  $anz_reihen_stern = gd_num_rows($abfrage_stern);
 		  if ( $anz_reihen_stern >= 1 )
 		    {
-        while ( $datensatz = mysqli_fetch_row( $abfrage_stern ) )
+        while ( $datensatz = gd_fetch_row($abfrage_stern) )
 	     {
-        foreach ( $datensatz as $field )
+        foreach (gd_arr($datensatz) as $field )
 		      {
 		      $feld = $field;
 		      }
@@ -571,7 +574,7 @@ print"<a href=\"browse.php?l0=allalb&pg=1&source=$source&evaluation=1\"><span cl
         print "<img src=\"img/0.gif\" height=\"14\" border=\"0\" align=\"right\">";
         print "</td>";
         }
-      mysqli_free_result( $abfrage_stern );
+      gd_free($abfrage_stern);
 ### Favoriten Ende      		
 		
     print "<td class=\"trklst\">";
@@ -583,11 +586,11 @@ print"<a href=\"browse.php?l0=allalb&pg=1&source=$source&evaluation=1\"><span cl
 				$image = $albumrecord["coverimg"];
          
 # 80*80 vom Cover anzeigen
-        $teil_cover = explode(".", $image);
+        $teil_cover = explode(".", gd_str($image));
         $cover_a = array( $imgpath, '/', $teil_cover[0], '-t', '.', $teil_cover[1] );
-        $cover_t = implode("", $cover_a);
+        $cover_t = implode("", gd_arr($cover_a));
         $cover_l = array( $pfad, $imgpath, '/', $teil_cover[0], '-t', '.', $teil_cover[1] );
-        $link_ct = implode("", $cover_l);
+        $link_ct = implode("", gd_arr($cover_l));
         $imgpath_pic = $imgpath."/".$image;
         
 				#print "Hallo<br>";
@@ -684,7 +687,7 @@ print"<a href=\"browse.php?l0=allalb&pg=1&source=$source&evaluation=1\"><span cl
 			print "<td><a class=\"brslst\" href=\"".$prefix.$albumrecord["cddbid"]."\">"
 			.$albumrecord["title"]."</a></td> ";
 
-#			if (strlen($prefix)>0){
+#			if (strlen(gd_str($prefix))>0){
 #				print "<td><a class=\"brslst\" href=\"".$prefix.$albumrecord["cddbid"]."\">"
 #				.$albumrecord["title"]."</a></td> ";
 #			}
@@ -737,10 +740,10 @@ print"<a href=\"browse.php?l0=allalb&pg=1&source=$source&evaluation=1\"><span cl
       print "</table>";
 
 	  print "<hr>";
-	    #$recset = mysql_db_query ("GiantDisc", $tempquery);
+	    #$recset = mysqli_query($link, $tempquery);
 	    #$con = mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
 	    $recset = mysqli_query( $con, $tempquery);
-      if (mysqli_affected_rows($con)>0){print("<p><small>".mysqli_affected_rows($con)." $output117</small><br>");}
+      if (gd_affected($con)>0){print("<p><small>".gd_affected($con)." $output117</small><br>");}
       print "<small>$output116";
       
 	  $pg++;
@@ -821,15 +824,15 @@ print"<a href=\"browse.php?l0=allalb&pg=1&source=$source&evaluation=1\"><span cl
   }
 
     ### This Album ###
-  if (strcmp($l0, "thisalb")==0){
+  if (strcmp(gd_str($l0), "thisalb")==0){
 #    print "<h4>This Album</h4>";
 	$tempquery = "SELECT * FROM album WHERE cddbid LIKE '%$albid'";
     $recset = mysqli_query ( $link, $tempquery);
 	$a = 0;
-	$anz_reihen = mysqli_affected_rows( $link );
+	$anz_reihen = gd_affected($link);
 	print "<hr>";
       print "<table borders=\"0\">";
-      while($row = mysqli_fetch_array($recset)) {
+      while($row = gd_fetch_array($recset)) {
 		$albumrecord = $row;
 		$a++;
 		print "<tr>";
@@ -840,11 +843,11 @@ print"<a href=\"browse.php?l0=allalb&pg=1&source=$source&evaluation=1\"><span cl
 			  $pfad = $htdocs;
 				$image = $albumrecord["coverimg"];
 				$imgpath = str_replace( $pfad, "", $imagedir );
-        $teil_cover = explode(".", $image);
+        $teil_cover = explode(".", gd_str($image));
         $cover_a = array( $imgpath, '/', $teil_cover[0], '-t', '.', $teil_cover[1] );
-        $cover_t = implode("", $cover_a);
+        $cover_t = implode("", gd_arr($cover_a));
         $cover_l = array( $pfad, $imgpath, '/',  $teil_cover[0], '-t', '.', $teil_cover[1] );
-        $link_ct = implode("", $cover_l);
+        $link_ct = implode("", gd_arr($cover_l));
         $imgpath_pic = $imgpath."/".$image;
         
 
@@ -927,7 +930,7 @@ print"<a href=\"browse.php?l0=allalb&pg=1&source=$source&evaluation=1\"><span cl
   }
 
   ### Playlist
-  if (strcmp($l0, "playlist")==0){
+  if (strcmp(gd_str($l0), "playlist")==0){
     print "<h4>$output119</h4>";
 
 print "<hr noshade>";
@@ -977,7 +980,7 @@ print "<hr noshade>";
 				
 		print "<td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</td>";
 
-    if (strcmp($tool, "edit")==0)		
+    if (strcmp(gd_str($tool), "edit")==0)		
       print "<td><a href=\"browse.php?l0=$l0&pl_id=$pl_id&title=$title&tool=no#liste\"><img border=\"0\" src=\"img/edit.png\" alt=\"Edit\" title=\"bearbeiten\"></a></td>";
     else
       print "<td><a href=\"browse.php?l0=$l0&pl_id=$pl_id&title=$title&tool=edit#liste\"><img border=\"0\" src=\"img/edit.png\" alt=\"Edit\" title=\"bearbeiten\"></a></td>";
@@ -1001,7 +1004,7 @@ print "<hr noshade>";
   }
 
   ### single Tracks
-  if (strcmp($l0, "s_tr")==0){
+  if (strcmp(gd_str($l0), "s_tr")==0){
     print "<h4>$output123</h4>";
 
 #$con = mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
@@ -1012,7 +1015,7 @@ print "<hr noshade>";
 #} 
 
 	strack_temp();
-#	$ergebnis = mysql_query( "INSERT INTO strack_temp SELECT * FROM tracks" );
+#	$ergebnis = mysqli_query($link,  "INSERT INTO strack_temp SELECT * FROM tracks" );
   $con = mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
   $ergebnis = mysqli_query( $con, "INSERT INTO strack_temp SELECT * FROM tracks WHERE sourceid='' OR tracknb=1 " );
   
@@ -1024,7 +1027,7 @@ print "<hr noshade>";
 
     $tempquery = "SELECT * FROM strack_temp";
 	$recset = mysqli_query ( $con, $tempquery);
-    if (mysqli_affected_rows($con)>0){print("<p><small>".mysqli_affected_rows($con)." single tracks</small><br>");}
+    if (gd_affected($con)>0){print("<p><small>".gd_affected($con)." single tracks</small><br>");}
 
 ####################
 	$ergebnis = mysqli_query( $con, "select artist, title, id from strack_temp" );
@@ -1033,9 +1036,10 @@ echo("<table><tr><td><small><b>Artist</b></small></td><td><small><b>Title</b></s
 $a = 0;
 $track = 1;
 $evenln = 1;
-while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+  $laenge = '';
+while ( $datensatz = gd_fetch_row($ergebnis) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		  {
 		  switch ($a)
 		  	{
@@ -1060,12 +1064,12 @@ while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
 				#print "<td class=\"trklst\">$track</td>";
 				print "<td class=\"trklst\">$artist</td><td class=\"trklst\">$title</td>";
 				$recset = mysqli_query( $con, "select mp3file from tracks where $feld = id");
-				while ( $datastep = mysqli_fetch_row( $recset ) )
+				while ( $datastep = gd_fetch_row($recset) )
 					{
-					foreach ( $datastep as $field )
+					foreach (gd_arr($datastep) as $field )
 						{
-						$httphost = $_SERVER["HTTP_HOST"];
-						$l = strlen($PATH_ABSOLUTE_mp3) - 3;
+						$httphost = $_SERVER["HTTP_HOST"] ?? null;
+						$l = strlen(gd_str($PATH_ABSOLUTE_mp3)) - 3;
 						$mp3path = substr($PATH_ABSOLUTE_mp3,$l,3);
 						print "<td class=\"trklst\"><a href=\"http://$httphost/music";
 						print "$mp3path";
@@ -1086,7 +1090,7 @@ while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
 						</td>";
 
       $erg_lyric = mysqli_query( $con ,"select lyrics from tracks where id = $feld && lyrics IS NOT NULL");
-      $anz_lyric = mysqli_num_rows( $erg_lyric );
+      $anz_lyric = gd_num_rows($erg_lyric);
       if ($anz_lyric > 0)
         {
         print "<td>&nbsp; &nbsp; &nbsp;<a href=\"javascript:popUp1('lyric.php?id=$feld')\">";       
@@ -1100,7 +1104,7 @@ while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
 					}
 
 				#print "<img border=\"0\" src=\"img/dl.gif\" alt=\"Download\"></a></td></tr>";
-				mysqli_free_result($recset);
+				gd_free($recset);
 				$a = 0;
 				$track++;
 				$evenln = 1-$evenln;
@@ -1109,7 +1113,7 @@ while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
 		  }
     }
 echo("</table>");
-mysqli_free_result($ergebnis);
+gd_free($ergebnis);
 $ergebnis = mysqli_query( $con, "DROP TABLE strack_temp" );
 
 
@@ -1119,16 +1123,16 @@ $ergebnis = mysqli_query( $con, "DROP TABLE strack_temp" );
 ##########################################################
 
   print "<!-- --><a NAME='liste'></a><!-- -->";
-if (strcmp($l0, "thisalb")!=0){
-if(strlen($albid)>0){
+if (strcmp(gd_str($l0), "thisalb")!=0){
+if(strlen(gd_str($albid))>0){
   	$tempquery = "SELECT * FROM album WHERE cddbid LIKE '%$albid'";
     $recset = mysqli_query ( $link, $tempquery);
 	$a = 0;
-	$anz_reihen = mysqli_affected_rows( $link );
-if (mysqli_affected_rows( $link )>0){print "<hr noshade>";}else{print "<p>&nbsp;</p>";}
+	$anz_reihen = gd_affected($link);
+if (gd_affected($link)>0){print "<hr noshade>";}else{print "<p>&nbsp;</p>";}
 #	print "<hr>";
       print "<table borders=\"0\">";
-      while($row = mysqli_fetch_array($recset)) {
+      while($row = gd_fetch_array($recset)) {
 		$albumrecord = $row;
 		$a++;
 		print "<tr>";
@@ -1140,11 +1144,11 @@ if (mysqli_affected_rows( $link )>0){print "<hr noshade>";}else{print "<p>&nbsp;
         $imgpath = str_replace( $pfad, "", $imagedir );
 
 # 80*80 vom Cover anzeigen
-  $teil_cover = explode(".", $image);
+  $teil_cover = explode(".", gd_str($image));
   $cover_a = array( $imgpath, '/', $teil_cover[0], '-t', '.', $teil_cover[1] );
-  $cover_t = implode("", $cover_a);
+  $cover_t = implode("", gd_arr($cover_a));
   $cover_l = array( $pfad, '/', $imgpath, '/', $teil_cover[0], '-t', '.', $teil_cover[1] );
-  $link_ct = implode("", $cover_l);
+  $link_ct = implode("", gd_arr($cover_l));
   $imgpath_pic = $imgpath."/".$image;
     
     if (file_exists($link_ct)){
@@ -1219,19 +1223,19 @@ if (mysqli_affected_rows( $link )>0){print "<hr noshade>";}else{print "<p>&nbsp;
 }}
   #####################################################################
 
-if(strlen($qrystr)>0){ # do query and show tracks
-  if (strlen($rating)==0){$rating=0;}
+if(strlen(gd_str($qrystr))>0){ # do query and show tracks
+  if (strlen(gd_str($rating))==0){$rating=0;}
   ### query tracks
   $recset = mysqli_query ( $link , $qrystr);
 
   ### display the tracks
-if(strlen($albid)<=0){
-  if (mysqli_affected_rows( $link )>0){print "<hr noshade>";}else{print "<p>&nbsp;</p>";}
+if(strlen(gd_str($albid))<=0){
+  if (gd_affected($link)>0){print "<hr noshade>";}else{print "<p>&nbsp;</p>";}
 }
-  print("<p><small><b>".mysqli_affected_rows( $link )." matching tracks</b></small></p>");
+  print("<p><small><b>".gd_affected($link)." matching tracks</b></small></p>");
   print("<table border=\"0\" cellspacing=\"0\">\n");
   $evenln = 1;
-  while($row = mysqli_fetch_array($recset)) {
+  while($row = gd_fetch_array($recset)) {
     if ($evenln){
       print "<tr class=\"lneven\">";
 	}
@@ -1248,10 +1252,10 @@ if(strlen($albid)<=0){
   }
   print("</table>\n");
   
-  mysqli_free_result($recset);
+  gd_free($recset);
   mysqli_close( $link );
 
-    if (strcmp($l0, "thisalb")==0 OR strcmp($l0, "al-gn")==0 OR strcmp($l0, "al-ti")==0 OR strcmp($l0, "al-ar")==0){
+    if (strcmp(gd_str($l0), "thisalb")==0 OR strcmp(gd_str($l0), "al-gn")==0 OR strcmp(gd_str($l0), "al-ti")==0 OR strcmp(gd_str($l0), "al-ar")==0){
       print "<table><tr><td>&nbsp;</td></tr><tr><td class=\"menu".$sel."active\"><a class=\"menu\" href=\"javascript:history.go(-1)\">$output081</a></td></tr></table>";
 
     }
@@ -1274,6 +1278,7 @@ print_footer ("browse");
 
 function schreibe_albumlink($prefix, $htdocs, $imagedir, $albumrecord, $showedit, $output132, $output133, $b_player, $bashplayer, $xspf, $output134)
 {
+  global $output149;
   print "<tr>";
 
 ### Favoriten Beginn
@@ -1282,12 +1287,12 @@ $link =  mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
      die( "Keine Verbindung zu MySQL" );
      
 		  $abfrage_stern = mysqli_query( $link ,"SELECT evaluation FROM album_fav WHERE cddbid LIKE '%$albumrecord[cddbid]%'" );
-		  $anz_reihen_stern = mysqli_num_rows( $abfrage_stern );
+		  $anz_reihen_stern = gd_num_rows($abfrage_stern);
 		  if ( $anz_reihen_stern >= 1 )
 		    {
-        while ( $datensatz = mysqli_fetch_row( $abfrage_stern ) )
+        while ( $datensatz = gd_fetch_row($abfrage_stern) )
 	     {
-        foreach ( $datensatz as $field )
+        foreach (gd_arr($datensatz) as $field )
 		      {
 		      $feld = $field;
 		      }
@@ -1322,7 +1327,7 @@ $link =  mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
         print "<img src=\"img/0.gif\" height=\"14\" border=\"0\" align=\"right\">";
         print "</td>";
         }
-      mysqli_free_result( $abfrage_stern );
+      gd_free($abfrage_stern);
 mysqli_close( $link );      
 ### Favoriten Ende      		
 
@@ -1337,11 +1342,11 @@ mysqli_close( $link );
     $imgpath = str_replace( $pfad, "", $imagedir );
 
 # 80*80 vom Cover anzeigen
-  $teil_cover = explode(".", $image);
+  $teil_cover = explode(".", gd_str($image));
   $cover_a = array( $imgpath, '/', $teil_cover[0], '-t', '.', $teil_cover[1] );
-  $cover_t = implode("", $cover_a);  
+  $cover_t = implode("", gd_arr($cover_a));  
   $cover_l = array( $pfad, $imgpath, '/', $teil_cover[0], '-t', '.', $teil_cover[1] );
-  $link_ct = implode("", $cover_l);
+  $link_ct = implode("", gd_arr($cover_l));
   $imgpath_pic = $imgpath."/".$image;  
   
     if (file_exists($link_ct)){
@@ -1377,7 +1382,7 @@ mysqli_close( $link );
   print "</td>";
   print "<td class=\"trklst\">".$albumrecord["artist"]."</td>";
   print "<td class=\"trklst\"> - </td>";
-  if (strlen($prefix)>0){
+  if (strlen(gd_str($prefix))>0){
     print "<td><a class=\"brslst\" href=\"".$prefix.$albumrecord["cddbid"]."#liste\">"
         .$albumrecord["title"]."</a></td> ";
   }

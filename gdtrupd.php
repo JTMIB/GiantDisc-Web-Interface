@@ -12,6 +12,7 @@
  */
   
 include "control_web.inc";
+$sel = '';
 print "<!doctype html public \"-//W3C//DTD HTML 3.2 Final//EN\">
 <html>
 <head>
@@ -24,27 +25,27 @@ print "<!doctype html public \"-//W3C//DTD HTML 3.2 Final//EN\">
 
 <?php 
 
-$artist = $_POST["artist"];
-$title = $_POST["title"];
-$genre1 = $_POST["genre1"];
-$genre2 = $_POST["genre2"];
-$year = $_POST["year"];
-$bpm = $_POST["bpm"];
-$lang = $_POST["lang"];
-$type = $_POST["type"];
-$rating = $_POST["rating"];
-$source = $_POST["source"];
-$sourceid = $_POST["sourceid"];
-$quality = $_POST["quality"];
-$tracknb = $_POST["tracknb"];
-$length = $_POST["length"];
-$mp3file = $_POST["mp3file"];
-$voladjust = $_POST["voladjust"];
-$lengthfrm = $_POST["lengthfrm"];
-$startfrm = $_POST["startfrm"];
-$created = $_POST["created"];
-$id = $_POST["id"];
-$lyrics = $_POST["lyrics"];
+$artist = $_POST["artist"] ?? null;
+$title = $_POST["title"] ?? null;
+$genre1 = $_POST["genre1"] ?? null;
+$genre2 = $_POST["genre2"] ?? null;
+$year = $_POST["year"] ?? null;
+$bpm = $_POST["bpm"] ?? null;
+$lang = $_POST["lang"] ?? null;
+$type = $_POST["type"] ?? null;
+$rating = $_POST["rating"] ?? null;
+$source = $_POST["source"] ?? null;
+$sourceid = $_POST["sourceid"] ?? null;
+$quality = $_POST["quality"] ?? null;
+$tracknb = $_POST["tracknb"] ?? null;
+$length = $_POST["length"] ?? null;
+$mp3file = $_POST["mp3file"] ?? null;
+$voladjust = $_POST["voladjust"] ?? null;
+$lengthfrm = $_POST["lengthfrm"] ?? null;
+$startfrm = $_POST["startfrm"] ?? null;
+$created = $_POST["created"] ?? null;
+$id = $_POST["id"] ?? null;
+$lyrics = $_POST["lyrics"] ?? null;
 
 
       
@@ -199,13 +200,13 @@ if(isset($id)){
   print ("SQL-COMMAND: ". $sqlcmd);
 
   if(! mysqli_query ( $link, $sqlcmd)){
-    echo "<p><b>Error: </b>".mysql_errno()." - ".mysql_error()."<br>";
+    echo "<p><b>Error: </b>".mysqli_errno($link)." - ".mysqli_error($link)."<br>";
   }
   else{
     print "<p><b>Record sucessfully updated</b>";
 
 ### Felder die NULL sein können wieder auf NULL setzen
-if (strlen($lyrics) < 1)
+if (strlen(gd_str($lyrics)) < 1)
     $sqlcmd = mysqli_query( $link, "UPDATE tracks SET lyrics = NULL WHERE id=".$id);
 
     print "<table align='right' border='0' cellspacing='0' cellpadding='1'><tr><td class=\"menu".$sel."active\"><a class=\"menu\" href=\"javascript:history.go(-2)\">$output081</a></td></tr></table></p>";

@@ -13,14 +13,13 @@
  
 include "control_web.inc";
 include "gdwebdef.php";
-
-$playtp = set_get_cookie($setplaytp, "playtp", "dl", $HTTP_COOKIE_VARS);
+$playtp = set_get_cookie($_GET['setplaytp'] ?? null, "playtp", "dl", $_COOKIE);
 
 ## Variablen aus Browser-Zeile
-$pl_id=$_GET['pl_id'];
-$trackid=$_GET['trackid'];
-$trackno=$_GET['trackno'];
-$com=$_GET['com'];
+$pl_id=$_GET['pl_id'] ?? null;
+$trackid=$_GET['trackid'] ?? null;
+$trackno=$_GET['trackno'] ?? null;
+$com=$_GET['com'] ?? null;
 
 #print_header ("browse", "", "$cgi_dir", "$char_set");
 $current = "browse";
@@ -42,12 +41,12 @@ $link =  mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
  if ( ! $link )
      die( "Keine Verbindung zu MySQL" );
 
-if (strcmp($com, "delete")==0 || strcmp($com, "up")==0 || strcmp($com, "down")==0)
+if (strcmp(gd_str($com), "delete")==0 || strcmp(gd_str($com), "up")==0 || strcmp(gd_str($com), "down")==0)
   {
   $ergebnis = mysqli_query( $link ,"select title from playlist where id = $pl_id");
-  while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+  while ( $datensatz = gd_fetch_row($ergebnis) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
     $p_title = $feld;
     }
 	print "<META HTTP-EQUIV='Refresh' CONTENT='1; URL=browse.php?l0=playlist&pl_id=$pl_id&title=$p_title&tool=edit#liste'>";  
@@ -71,17 +70,17 @@ if (strcmp($com, "delete")==0 || strcmp($com, "up")==0 || strcmp($com, "down")==
     // print the main top menu
     print "<table border='0' cellspacing='0' cellpadding='1'><tr>";
 
-    $sel = (strcmp($current, "search")==0) ? "" : "in";
+    $sel = (strcmp(gd_str($current), "search")==0) ? "" : "in";
     print "<td class=\"menu".$sel."active\"><a class=\"menu\" href=\"index.php\">Search</a></td>";
     print "<td>&nbsp;</td>";
-    $sel = (strcmp($current, "browse")==0) ? "" : "in";
+    $sel = (strcmp(gd_str($current), "browse")==0) ? "" : "in";
     print "<td class=\"menu".$sel."active\"><a class=\"menu\" href=\"browse.php\">Browse</a></td>";
     print "<td>&nbsp;</td>";
-    $sel = (strcmp($current, "record")==0) ? "" : "in";
+    $sel = (strcmp(gd_str($current), "record")==0) ? "" : "in";
     print "<td class=\"menu".$sel."active\"><a class=\"menu\" href=\"record.php\">Record</a></td>";
 
     print "<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>";
-    $sel = (strcmp($current, "settings")==0) ? "" : "in";
+    $sel = (strcmp(gd_str($current), "settings")==0) ? "" : "in";
     print "<td class=\"menu".$sel."active\"><a class=\"light\" href=\"settings.php\">Options</a></td>";
 
     print "</tr></table>";
@@ -115,20 +114,20 @@ print "</table>";
 print "<h4>Playlist</h4><hr noshade>";
 
 
-if (strcmp($com, "ask_del")==0)
+if (strcmp(gd_str($com), "ask_del")==0)
   {
   print("<p><small><b>$output083</b></small></p>");
   $ergebnis = mysqli_query( $link ,"select title from playlist where id = $pl_id");
-  while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+  while ( $datensatz = gd_fetch_row($ergebnis) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
     $p_title = $feld;
     }
   $ergebnis = mysqli_query( $link ,"select artist, title from tracks where id = '$trackid'");
   $a = 1;
-  while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+  while ( $datensatz = gd_fetch_row($ergebnis) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 	 	 switch ($a)
 			{
 			case $a == 1:
@@ -156,7 +155,7 @@ if (strcmp($com, "ask_del")==0)
 
   }
 
-if (strcmp($com, "delete")==0)
+if (strcmp(gd_str($com), "delete")==0)
   {
   print("<p><small><b>$output083</b></small></p>");
   # löschen / delete
@@ -166,9 +165,9 @@ if (strcmp($com, "delete")==0)
   $ergebnis = mysqli_query( $link ,"select trackid from playlistitem where playlist = $pl_id order by tracknumber");
   $a = 1;
   $trackno = array();
-  while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+  while ( $datensatz = gd_fetch_row($ergebnis) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
       {
 			$trackno[$a] = $feld;
 			#print "$trackno[$a]<br>";
@@ -187,11 +186,11 @@ if (strcmp($com, "delete")==0)
   # Ende löschen / delete
 
 
-if (strcmp($com, "up")==0 || strcmp($com, "down")==0)
+if (strcmp(gd_str($com), "up")==0 || strcmp(gd_str($com), "down")==0)
   {
-  if (strcmp($com, "up")==0)
+  if (strcmp(gd_str($com), "up")==0)
       print("<p><small><b>$output088</b></small></p>");
-  if (strcmp($com, "down")==0)
+  if (strcmp(gd_str($com), "down")==0)
       print("<p><small><b>$output089</b></small></p>");
   
   
@@ -202,9 +201,9 @@ if (strcmp($com, "up")==0 || strcmp($com, "down")==0)
   $ergebnis = mysqli_query( $link ,"select trackid from playlistitem where playlist = $pl_id order by tracknumber");
   $a = 1;
   $tracknr = array();
-  while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+  while ( $datensatz = gd_fetch_row($ergebnis) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
       {
 			$tracknr[$a] = $feld;
 			#print "$tracknr[$a]<br>";
@@ -213,13 +212,13 @@ if (strcmp($com, "up")==0 || strcmp($com, "down")==0)
     }
     # tauschen
     $aktuell = $tracknr[$trackno];
-    if (strcmp($com, "up")==0)
+    if (strcmp(gd_str($com), "up")==0)
       {
       $davor = $tracknr[$trackno - 1];
       $tracknr[$trackno - 1] = $aktuell;
       $tracknr[$trackno] = $davor;     
       }
-    if (strcmp($com, "down")==0)
+    if (strcmp(gd_str($com), "down")==0)
       {
       $danach = $tracknr[$trackno + 1];
       $tracknr[$trackno + 1] = $aktuell;

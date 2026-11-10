@@ -19,7 +19,7 @@ $c = 0;
 $d = 0;
 
 $dateiname = "00/rip.txt";
-$fp = fopen( $dateiname, "r" ) or die ("Konnte $dateiname nicht öffnen");
+$fp = @fopen( $dateiname, "r" ) or die ("Konnte $dateiname nicht öffnen");
 while ( ! feof( $fp))
 	{
 	$zeile = fgets($fp, 1024);
@@ -41,7 +41,7 @@ fclose( $fp );
 # welche Datei wird codiert?
 $f = 0;
 $dateiname = "00/rip.txt";
-$fp = fopen( $dateiname, "r" ) or die ("Konnte $dateiname nicht öffnen");
+$fp = @fopen( $dateiname, "r" ) or die ("Konnte $dateiname nicht öffnen");
 while ( ! feof( $fp))
 	{
 	$zeile = fgets($fp, 1024);

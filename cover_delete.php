@@ -27,9 +27,9 @@ include "control_web.inc";
 include "gdwebdef.php";
 
 ## Variablen aus Browser-Zeile
-$cddbid=$_GET['cddbid'];
-$artist=$_GET['artist'];
-$title=$_GET['title'];
+$cddbid=$_GET['cddbid'] ?? null;
+$artist=$_GET['artist'] ?? null;
+$title=$_GET['title'] ?? null;
 
 
 print "<meta http-equiv=\"refresh\" content=\"3;URL=cover.php?cddbid=$cddbid\">";
@@ -48,13 +48,13 @@ print "$output103 $cddbid / $artist / $title $output104";
 
 
 $qrystr = mysqli_query( $link, "SELECT * FROM album WHERE cddbid LIKE '$cddbid%' and artist LIKE '$artist%' and title LIKE '$title%'");
-$anz_row = mysqli_num_rows( $qrystr );
+$anz_row = gd_num_rows($qrystr);
 #print "$anz_row<br>";      
 
 	$a = 0;
-	while ( $datensatz = mysqli_fetch_row( $qrystr ) )
+	while ( $datensatz = gd_fetch_row($qrystr) )
     	{
-    	foreach ( $datensatz as $feld )
+    	foreach (gd_arr($datensatz) as $feld )
 		  	{
 			   $a++;
 			   if ($a == 5)
@@ -65,18 +65,18 @@ $anz_row = mysqli_num_rows( $qrystr );
 			  }
 		  }
 
-$coverimg_t = explode(".", $coverimg);
+$coverimg_t = explode(".", gd_str($coverimg));
 #print "$coverimg_t[0]<br>" ;
 #print "$coverimg_t[1]<br>" ;
 $coverimg_t = $coverimg_t[0] . "-t." . $coverimg_t[1];
 
 $qrystr = mysqli_query( $link, "UPDATE album SET coverimg=NULL WHERE cddbid LIKE '$cddbid%' and artist LIKE '$artist%' and title LIKE '$title%'");
-unlink("$imagedir/$coverimg_t");
-unlink("$imagedir/$coverimg");
+@unlink("$imagedir/$coverimg_t");
+@unlink("$imagedir/$coverimg");
 
       
 
-#  mysqli_free_result( $qrystr );
+#  gd_free($qrystr);
   mysqli_close( $link );
 ?>
 <hr noshade>

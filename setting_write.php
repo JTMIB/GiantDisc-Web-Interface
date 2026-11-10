@@ -13,21 +13,22 @@
  
 include "control_web.inc";
 include "gdwebdef.php";
-
-$playtp = set_get_cookie($setplaytp, "playtp", "dl", $HTTP_COOKIE_VARS);
+$current = '';
+$sel = '';
+$playtp = set_get_cookie($_GET['setplaytp'] ?? null, "playtp", "dl", $_COOKIE);
 
 ## Variablen aus Browser-Zeile
-$submitted=$_GET['submitted']; 
-$prefc=$_GET['prefc'];
-$language=$_GET['language'];
-$CharSet=$_GET['CharSet'];
-$mp3_Q=$_GET['mp3_Q'];
-$ogg_Q=$_GET['ogg_Q'];
-$flac_Q=$_GET['flac_Q'];
-$opus_Q=$_GET['opus_Q'];
-$m4a_Q=$_GET['m4a_Q'];
-$read_CD=$_GET['read_CD'];
-$dev_cd=$_GET['dev_cd'];
+$submitted=$_GET['submitted'] ?? null; 
+$prefc=$_GET['prefc'] ?? null;
+$language=$_GET['language'] ?? null;
+$CharSet=$_GET['CharSet'] ?? null;
+$mp3_Q=$_GET['mp3_Q'] ?? null;
+$ogg_Q=$_GET['ogg_Q'] ?? null;
+$flac_Q=$_GET['flac_Q'] ?? null;
+$opus_Q=$_GET['opus_Q'] ?? null;
+$m4a_Q=$_GET['m4a_Q'] ?? null;
+$read_CD=$_GET['read_CD'] ?? null;
+$dev_cd=$_GET['dev_cd'] ?? null;
 
 
 print "<!DOCTYPE html
@@ -104,7 +105,7 @@ if ( $submitted == $output141)
         print "$read_CD<br>";
         print "$dev_cd<br>";
         
-        $myfile = fopen("setting.inc", "w") or die("Kann Datei nicht öffnen!");
+        $myfile = @fopen("setting.inc", "w") or die("Kann Datei nicht öffnen! " . (error_get_last()['message'] ?? ''));
         fwrite($myfile, "<?php\n\n");
         fwrite($myfile, "###########################################################################\n");
         fwrite($myfile, "# prefered format\n");

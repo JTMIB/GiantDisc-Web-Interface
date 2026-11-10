@@ -20,13 +20,13 @@ include "control_web.inc";
 #print_header ("browse", "", "$cgi_dir", "$host", "$requ");
 print_header ("browse", "", "$cgi_dir", "", $output135, $output136, $output137, $output138);
 
-$link =  $link =  mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
+$link =  mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
   if ( ! $link )
       die( "Keine Verbindung zu MySQL" );
 
 ## Variablen aus Browser-Zeile
-$playlistname=$_GET['playlistname'];
-$id=$_GET['id'];
+$playlistname=$_GET['playlistname'] ?? null;
+$id=$_GET['id'] ?? null;
 
 ### Show first level:
 print "<p></p>";
@@ -47,19 +47,19 @@ print "</tr>";
 print "</table>";
 
 $ergebnis = mysqli_query( $link , "SELECT id FROM playlist WHERE title = '$playlistname'" );
-$anz_felder = mysqli_num_fields( $ergebnis );
+$anz_felder = gd_num_fields($ergebnis);
 
 $a = 0;
-while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+while ( $datensatz = gd_fetch_row($ergebnis) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		  {
    	  $pl_id = $feld;
 		  }
     }
 
 
-$lang = strlen($playlistname);
+$lang = strlen(gd_str($playlistname));
 if ($lang == 0)
 {
 print "<table><tr><td><P>&nbsp;<BR>&nbsp;<BR>&nbsp;<BR></P>";
@@ -79,12 +79,12 @@ if ($pl_id <= 0)
 	mysqli_query( $link , "INSERT INTO playlist (title, author, note) VALUES ('$playlistname', '', '')" );
 
 	$ergebnis = mysqli_query( $link , "SELECT id FROM playlist WHERE title = '$playlistname'" );
-	$anz_felder = mysqli_num_fields( $ergebnis );
+	$anz_felder = gd_num_fields($ergebnis);
 
 	$a = 0;
-	while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+	while ( $datensatz = gd_fetch_row($ergebnis) )
 	    {
-	    foreach ( $datensatz as $feld )
+	    foreach (gd_arr($datensatz) as $feld )
 			  {
 	   	  $pl_id = $feld;
 			  }
@@ -92,15 +92,15 @@ if ($pl_id <= 0)
 
 	mysqli_query( $link , "INSERT INTO playlistitem (playlist, tracknumber, trackid) VALUES ('$pl_id', 1, '$id')" );
 
-	mysqli_free_result($ergebnis);
+	gd_free($ergebnis);
 
 	}
 else
 	{
 	#######################################################################################
 	### insert a title into playlist
-	mysqli_free_result($ergebnis);
-#	mysql_close( $link );
+	gd_free($ergebnis);
+#	mysqli_close($link);
 	$title = $playlistname;
 	p_appendex ($pl_id, $title, $id, $link);
 	}

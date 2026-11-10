@@ -12,6 +12,16 @@
  */
  
 include "control_web.inc";
+$link = mysqli_connect(MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB);
+$schritt = $_GET['schritt'] ?? '';
+$Folder = $_GET['Folder'] ?? '';
+$file = $_GET['file'] ?? '';
+$composer = $_GET['composer'] ?? '';
+$genre1 = $_GET['genre1'] ?? '';
+$genre2 = $_GET['genre2'] ?? '';
+$year = $_GET['year'] ?? '';
+$bpm = $_GET['bpm'] ?? '';
+$rating = $_GET['rating'] ?? '';
 
 
 print_header ("record", "", "$cgi_dir", "$host", "$requ");
@@ -83,7 +93,7 @@ while ($entry = $cdir->read()) {
 	   		echo "$entry";
 	   		}
 	  echo "</td>";
-      echo "<td nowrap class=treetext align=right>".GetRealVolume(filesize($entry))."</td>";
+      echo "<td nowrap class=treetext align=right>".GetRealVolume(@filesize($entry))."</td>";
 
 	   echo '</td></tr>';
 		}
@@ -155,9 +165,9 @@ print "</select></small>
 $selected = 2;
 
 
-  $recset = mysql_db_query ("GiantDisc", "SELECT * FROM musictype ORDER BY id");
+  $recset = mysqli_query($link, "SELECT * FROM musictype ORDER BY id");
   print "<option value=\"\">&nbsp;</option>\n";
-  while($row = mysql_fetch_array($recset)) {
+  while($row = gd_fetch_array($recset)) {
     print "<option value=\"".$row["id"]."\"";
     if ($row["id"] == $selected) {print(" selected");};
     print ">";
@@ -176,9 +186,9 @@ print "</select></small>
 $selected = 1;
   $recset = array("-", "0", "+", "++");
   print "<option value=\"\">&nbsp;</option>\n";
-  while(list($key, $value) = each($recset)) {
+  foreach (gd_arr($recset) as $key => $value) {
     print "<option value=\"".$key."\"";
-    if (strlen($selected)>0 && $key == $selected) {print(" selected");};
+    if (strlen(gd_str($selected))>0 && $key == $selected) {print(" selected");};
     print ">";
 	print $value."</option>\n";
   }
@@ -192,9 +202,9 @@ print "</select></small>
 $selected = 1;
 
 
-  $recset = mysql_db_query ("GiantDisc", "SELECT * FROM source ORDER BY id");
+  $recset = mysqli_query($link, "SELECT * FROM source ORDER BY id");
   print "<option value=\"\">&nbsp;</option>\n";
-  while($row = mysql_fetch_array($recset)) {
+  while($row = gd_fetch_array($recset)) {
     print "<option value=\"".$row["id"]."\"";
     if ($row["id"] == $selected) {print(" selected");};
     print ">";
@@ -223,26 +233,26 @@ print "</td></tr></table>";
 #if ( ! $link )
 #    die( "Keine Verbindung zu MySQL" );
 #mysql_select_db( $db, $link )
-#    or die ( "Konnte Datenbank \"$db\" nicht öffnen: ".mysql_error() );
+#    or die ( "Konnte Datenbank \"$db\" nicht öffnen: ".mysqli_error($link) );
 
-$ergebnis = mysql_db_query( "GiantDisc", "SELECT mp3file FROM tracks WHERE mp3file LIKE 'trxx%'" );
-$anz_felder = mysql_num_fields( $ergebnis );
-$anz_reihen = mysql_num_rows( $ergebnis );
+$ergebnis = mysqli_query($link, "SELECT mp3file FROM tracks WHERE mp3file LIKE 'trxx%'" );
+$anz_felder = gd_num_fields($ergebnis);
+$anz_reihen = gd_num_rows($ergebnis);
 
-while ( $datensatz = mysql_fetch_row( $ergebnis ) )
+while ( $datensatz = gd_fetch_row($ergebnis) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		  {
 		  }
     }
-#mysql_close( $link );
+#mysqli_close($link);
 
 # errechnen von naechster cddbid
 if ($anz_reihen == 0)
 	$feld = "trxx00000000.mp3";
-$feld = substr($feld, 4, 8);
+$feld = substr(gd_str($feld), 4, 8);
 $feld++;
-$lang = strlen($feld);
+$lang = strlen(gd_str($feld));
 $soll = 8 - $lang;
 $y = 0;
 while ($y < $soll)
@@ -285,29 +295,30 @@ case 3:
 		$ausgabe = implode("",$reihe);
 		$reihe[0] = "$htdocs/music/01/trxx";
 		$reihe[1] = $cddbid;
-		if (strstr($ausgabe, "mp3"))
+		if (strstr(gd_str($ausgabe), "mp3"))
 		$reihe[2] = ".mp3";
-		if (strstr($ausgabe, "ogg"))
+		if (strstr(gd_str($ausgabe), "ogg"))
 		$reihe[2] = ".ogg";
-		if (strstr($ausgabe, "flac"))
+		if (strstr(gd_str($ausgabe), "flac"))
 		$reihe[2] = ".flac";
 		
 		$sourceid = implode("",$reihe);
 		copy ($ausgabe, $sourceid);
 		
-		if (strstr($ausgabe, "mp3"))
+		$filetype = '';
+		if (strstr(gd_str($ausgabe), "mp3"))
 			$filetype = "mp3";
-		if (strstr($ausgabe, "ogg"))
+		if (strstr(gd_str($ausgabe), "ogg"))
 			$filetype = "ogg";
-		if (strstr($ausgabe, "flac"))
+		if (strstr(gd_str($ausgabe), "flac"))
 			$filetype = "flac";
 
 
 $modified = date("Y-m-d");
 
 # Track in Datenbank einfügen
-$type = $type - 1;
-$source = $source - 1;
+$type = (int)$type - 1;
+$source = (int)$source - 1;
 $tracknb = 1;
 
 $CDid = $cddbid;
@@ -319,10 +330,10 @@ $CDid = $cddbid;
 									VALUES ( '$artist', '$title', '$composer', '$genre1', '$genre2', '$year', '$lang', '$type',
 											'$rating', '0', '$source', '$CDid', '$tracknb', 'trxx$cddbid.$filetype', '0', '0',
 											 '0', '0', '$bpm', NULL, '$filetype', '$modified', '$modified', NULL, NULL)";
-		$ergebnis = mysql_db_query( "GiantDisc", $anfrage );
+		$ergebnis = mysqli_query($link, $anfrage );
 
 		if ( ! $ergebnis )
-			die ("Insert ist fehlgeschlagen: ".mysql_error());
+			die ("Insert ist fehlgeschlagen: ".mysqli_error($link));
 
 
 $artist = str_replace(" ", "+", $artist);

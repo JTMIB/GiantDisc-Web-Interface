@@ -14,24 +14,23 @@
 include "control_web.inc";
 
 ## Variablen aus Browser-Zeile
-$playtp=$_GET['playtp'];
-$prAlbum=$_GET['prAlbum'];
-$albid=$_GET['albid'];
-$id=$_GET['id'];
-if (isset($_GET['prPlaylist'])) {
-    $prPlaylist = $_GET['prPlaylist'];
-}
+$playtp=$_GET['playtp'] ?? null;
+$prAlbum=$_GET['prAlbum'] ?? null;
+$albid=$_GET['albid'] ?? null;
+$id=$_GET['id'] ?? null;
+$mp3f = $_GET['mp3f'] ?? null;
+$prPlaylist = $_GET['prPlaylist'] ?? null;
 
-#$prPlaylist=$_GET['prPlaylist']; 
+#$prPlaylist=$_GET['prPlaylist'] ?? null; 
 #if(isset($mp3f)){
 #  $mp3path = full_mp3_fname($mp3f);
 #}
 
 
-$httphost = $_SERVER["HTTP_HOST"];
+$httphost = $_SERVER["HTTP_HOST"] ?? null;
 
 ### Dynamically send file
-if (strcmp($playtp, "df")==0){
+if (strcmp(gd_str($playtp), "df")==0){
   header("Content-Type: audio/xspf");
   header("Content-Location: ".$mp3path);
   #header("Content-Disposition: filename=".$mp3path);
@@ -41,13 +40,13 @@ if (strcmp($playtp, "df")==0){
 
 ##########################################################################
 ### VLC xspf-Playlist remote file (URL / http)
-if (strcmp($playtp, "pr")==0 && !isset($prAlbum)){
+if (strcmp(gd_str($playtp), "pr")==0 && !isset($prAlbum)){
 
  if ($prPlaylist >= 0){
  $link =  mysqli_connect( MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB );
   if ( ! $link )
       die( "Keine Verbindung zu MySQL" );
-# $recset = mysql_db_query ("GiantDisc",
+# $recset = mysqli_query($link,
 # "SELECT tracks.length, tracks.artist, tracks.title, tracks.mp3file
 #  FROM tracks, playlistitem
 #  WHERE playlistitem.playlist = $prPlaylist AND playlistitem.trackid = tracks.id");
@@ -67,9 +66,9 @@ if (strcmp($playtp, "pr")==0 && !isset($prAlbum)){
   print "	<trackList>\n";   
 
   $a = 0;
-while ( $datensatz = mysqli_fetch_row( $recset ) )
+while ( $datensatz = gd_fetch_row($recset) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		  {
 		  if ( $a == 0 )
 			{
@@ -92,7 +91,7 @@ while ( $datensatz = mysqli_fetch_row( $recset ) )
         }
 			if ( $a == 3)
 				{
-				$l = strlen($PATH_ABSOLUTE_mp3) - 3;
+				$l = strlen(gd_str($PATH_ABSOLUTE_mp3)) - 3;
 				$mp3path = substr($PATH_ABSOLUTE_mp3,$l,3);
 				print "		<track>\n";
 				print "			<location>";
@@ -124,7 +123,7 @@ while ( $datensatz = mysqli_fetch_row( $recset ) )
   print "	</extension>\n";
   print "</playlist>\n";
     
-# mysqli_free_result($recset);
+# gd_free($recset);
  mysqli_close( $link );  
  }
 exit;
@@ -141,7 +140,7 @@ $link =  mysqli_connect( MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB );
       die( "Keine Verbindung zu MySQL" );
   $abfrage="SELECT artist, title FROM album WHERE cddbid ='".$albid."'";
   $ergebnis = mysqli_query ( $link, $abfrage);
-  $anz_reihen = mysqli_affected_rows( $link );
+  $anz_reihen = gd_affected($link);
   while($reihe = mysqli_fetch_assoc($ergebnis)) {
     $artist = str_replace("&#39;","-",$reihe["artist"]);
     $artist = str_replace("&","-",$reihe["artist"]);
@@ -153,7 +152,7 @@ $link =  mysqli_connect( MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB );
     $title = str_replace("'","-",$title);
     $title = str_replace("´","-",$title);
     }
-#mysqli_free_result($ergebnis);
+#gd_free($ergebnis);
 mysqli_close( $link );
 
 ###      
@@ -173,7 +172,7 @@ $link =  mysqli_connect( MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB );
   print "	<trackList>\n";
 
 
-  while($row = mysqli_fetch_array($recset)) {  
+  while($row = gd_fetch_array($recset)) {  
    ###  Sonderzeichen zurück tauschen
    if (isset($row['artist'])) {
     $row['artist'] = str_replace("&#39;", "'", $row['artist']);
@@ -213,7 +212,7 @@ $link =  mysqli_connect( MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB );
   print "</playlist>\n";
 
 
-mysqli_free_result($recset);
+gd_free($recset);
 mysqli_close( $link );
 }
 
@@ -222,7 +221,7 @@ mysqli_close( $link );
 
 ##########################################################################
 ### Redirect to mp3 file
-if (strcmp($playtp, "rd")==0){
+if (strcmp(gd_str($playtp), "rd")==0){
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>

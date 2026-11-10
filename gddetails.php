@@ -34,7 +34,7 @@ print "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=$char_set\
       die( "Keine Verbindung zu MySQL" );
 
 ## Variablen aus Browser-Zeile
-$id=$_GET['id'];
+$id=$_GET['id'] ?? null;
       
 #phpinfo();
 
@@ -198,7 +198,7 @@ if(isset($id)){
 #  print("<table border=\"0\" cellspacing=\"0\">\n");
   $recset = mysqli_query ( $link, "SELECT * FROM tracks WHERE id=".$id);
 
-  if($row = mysqli_fetch_array($recset)) {
+  if($row = gd_fetch_array($recset)) {
     show_selform($row["artist"], $row["title"], $row["genre1"], $row["genre2"],
 				$row["year"], $row["lang"], $row["type"], $row["rating"], $row["length"],
 				$row["source"], $row["sourceid"], $row["tracknb"], $row["mp3file"], $row["bitrate"],
@@ -206,7 +206,7 @@ if(isset($id)){
 				$row["bpm"], $row["lyrics"], $row["created"], $row["modified"], $row["backup"],
 				$row["id"]);
   }
-  mysqli_free_result($recset);
+  gd_free($recset);
   mysqli_close( $link );
 }
 ?>

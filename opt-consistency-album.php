@@ -17,15 +17,17 @@ include "control_web.inc";
 print_header ("Options", "", "$cgi_dir", "$char_set", $output135, $output136, $output137, $output138);
 
 ## Variablen aus Browser-Zeile
-#$nocovers=$_GET['nocovers'];
-#$emptyalb=$_GET['emptyalb']; 
+#$nocovers=$_GET['nocovers'] ?? null;
+#$emptyalb=$_GET['emptyalb'] ?? null; 
 if (isset($_GET['nocovers'])) {
-    $nocovers = $_GET['nocovers'];
+    $nocovers = $_GET['nocovers'] ?? null;
 }
 if (isset($_GET['emptyalb'])) {
-    $emptyalb = $_GET['emptyalb'];
+    $emptyalb = $_GET['emptyalb'] ?? null;
 }
  
+$prefix = '';
+$showedit = '';
 ?>
 
 <h2>Matching Albums</h2>
@@ -49,13 +51,13 @@ if(isset($emptyalb)){
 
   print "<table>\n";
   $counter=0;
-  while($row = mysqli_fetch_array($recset) and $row["cnt"]==0) {
-    write_albumlink($prefix, $row, $showedit, $output132, $output133, $b_player, $bashplayer, $xspf, $output134);
+  while($row = gd_fetch_array($recset) and ($row["cnt"] ?? 0) == 0) {
+    schreibe_albumlink($prefix, $htdocs, $imagedir, $row, $showedit, $output132, $output133, $b_player, $bashplayer, $xspf, $output134);
     $counter++;
   }
   print "</table>\n";
   print "<p><b>".($counter ? $counter : "$output051")." $output052</b></p>";
-  mysqli_free_result($recset);  
+  gd_free($recset);  
 }
 
 
@@ -67,7 +69,7 @@ elseif(isset($nocovers)){
 
   print "<table>\n";
   $counter=0;
-  while($row = mysqli_fetch_array($recset)) {
+  while($row = gd_fetch_array($recset)) {
 #    write_albumlink($prefix, $row, $showedit, $output132, $output133, $b_player, $bashplayer, $xspf, $output134);
     schreibe_albumlink($prefix, $htdocs, $imagedir, $row, $showedit, $output132, $output133, $b_player, $bashplayer, $xspf, $output134);
 #    schreibe_albumlink("browse.php?l0=al-ar&l1=$l1&ar=$ar&albid=", $htdocs, $imagedir, $row, $showedit, $output132, $output133, $b_player, $bashplayer, $xspf, $output134);
@@ -76,7 +78,7 @@ elseif(isset($nocovers)){
   print "</table>\n";
   
   print "<p><b>".($counter ? $counter : "No")." $output046</b></p>";
-  mysqli_free_result($recset);  
+  gd_free($recset);  
   mysqli_close( $link );
 }
 
@@ -99,12 +101,12 @@ $link =  mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
      die( "Keine Verbindung zu MySQL" );
      
 		  $abfrage_stern = mysqli_query( $link ,"SELECT evaluation FROM album_fav WHERE cddbid LIKE '%$albumrecord[cddbid]%'" );
-		  $anz_reihen_stern = mysqli_num_rows( $abfrage_stern );
+		  $anz_reihen_stern = gd_num_rows($abfrage_stern);
 		  if ( $anz_reihen_stern >= 1 )
 		    {
-        while ( $datensatz = mysqli_fetch_row( $abfrage_stern ) )
+        while ( $datensatz = gd_fetch_row($abfrage_stern) )
 	     {
-        foreach ( $datensatz as $field )
+        foreach (gd_arr($datensatz) as $field )
 		      {
 		      $feld = $field;
 		      }
@@ -139,7 +141,7 @@ $link =  mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
         print "<img src=\"img/0.gif\" height=\"14\" border=\"0\" align=\"right\">";
         print "</td>";
         }
-      mysqli_free_result( $abfrage_stern );
+      gd_free($abfrage_stern);
 mysqli_close( $link );      
 ### Favoriten Ende      		
 
@@ -154,11 +156,11 @@ mysqli_close( $link );
     $imgpath = str_replace( $pfad, "", $imagedir );
 
 # 80*80 vom Cover anzeigen
-  $teil_cover = explode(".", $image);
+  $teil_cover = explode(".", gd_str($image));
   $cover_a = array( $imgpath, '/', $teil_cover[0], '-t', '.', $teil_cover[1] );
-  $cover_t = implode("", $cover_a);  
+  $cover_t = implode("", gd_arr($cover_a));  
   $cover_l = array( $pfad, $imgpath, '/', $teil_cover[0], '-t', '.', $teil_cover[1] );
-  $link_ct = implode("", $cover_l);
+  $link_ct = implode("", gd_arr($cover_l));
   $imgpath_pic = $imgpath."/".$image;  
   
     if (file_exists($link_ct)){
@@ -194,7 +196,7 @@ mysqli_close( $link );
   print "</td>";
   print "<td class=\"trklst\">".$albumrecord["artist"]."</td>";
   print "<td class=\"trklst\"> - </td>";
-  if (strlen($prefix)>0){
+  if (strlen(gd_str($prefix))>0){
     print "<td><a class=\"brslst\" href=\"".$prefix.$albumrecord["cddbid"]."#liste\">"
         .$albumrecord["title"]."</a></td> ";
   }

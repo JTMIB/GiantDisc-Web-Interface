@@ -13,10 +13,10 @@
  
 include "control_web.inc";
 include "gdwebdef.php";
-
-$playtp = set_get_cookie($setplaytp, "playtp", "dl", $HTTP_COOKIE_VARS);
+$playtp = set_get_cookie($_GET['setplaytp'] ?? null, "playtp", "dl", $_COOKIE);
 
 print_header ("settings", "", "$cgi_dir", "$char_set", $output135, $output136, $output137, $output138);
+$sel = '';
 
 print "<br><hr><br>";
 print "<ul>";
@@ -41,15 +41,15 @@ $createtable = mysqli_query( $link , "CREATE TABLE backupList (
 if ($handle = opendir('backup')) {
 #    print "<table>";
     while (false !== ($entry = readdir($handle))) {
-          if ($file === ".." or $file === ".") continue;
+          if ($entry === ".." or $entry === ".") continue;
 
-          $str_lang = strlen($entry);
+          $str_lang = strlen(gd_str($entry));
           if ($str_lang > 2)
             {
 #            print "<tr><td>$entry</td>";
-            $groesse = filesize("backup/$entry")/1000000;
+            $groesse = @filesize("backup/$entry")/1000000;
 #            print "<td> $groesse MB</td>";
-            $datum = filemtime("backup/$entry");
+            $datum = @filemtime("backup/$entry");
             $dateidatum = date("d.m.Y", $datum);
 #            print "<td> $dateidatum</td>";
 #            print "</tr>";
@@ -70,13 +70,13 @@ $link =  mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
 
 #$abfrage = mysqli_query( $link,"SELECT filename, groesse, datum FROM backupList ORDER BY datum DESC" );
 $abfrage = mysqli_query( $link,"SELECT filename, groesse, datum FROM backupList ORDER BY filename DESC" );
-$anz_reihen = mysqli_num_rows( $abfrage );
+$anz_reihen = gd_num_rows($abfrage);
 #print "$anz_reihen<br>";
 
 $evenln = 1;
 echo("<table><tr><td><small><b>$anz_reihen $output156</b></small></td></tr>");
 echo("<tr><td><small><b>$output005</b></small></td><td><small><b>MB</b></small></td><td><small><b>$output155</b></small></td><td> </td></tr>");
-while($row = mysqli_fetch_object($abfrage))
+while($row = gd_fetch_object($abfrage))
 {
 	if ($evenln)
 	{
@@ -90,7 +90,7 @@ else
 	$evenln = 1-$evenln;
 }
 echo("</table>");
-mysqli_free_result( $abfrage );
+gd_free($abfrage);
 $abfrage = mysqli_query( $link, "DROP TABLE backupList" );
 mysqli_close( $link );
 ##########################################

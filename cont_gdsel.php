@@ -25,17 +25,19 @@ print_header ("settings", "", "$cgi_dir", "$char_set", $output135, $output136, $
       die( "Keine Verbindung zu MySQL" );
 
 ## Variablen aus Browser-Zeile
-$showartist=$_GET['showartist'];
-$artist=$_GET['artist'];
-$showtitle=$_GET['showtitle'];
-$title=$_GET['title'];
-$showgenre=$_GET['showgenre'];
-$genre=$_GET['genre'];
-$showrating=$_GET['showrating'];
-$rating=$_GET['rating'];
-$playtp=$_GET['playtp'];
+$showartist=$_GET['showartist'] ?? null;
+$artist=$_GET['artist'] ?? null;
+$showtitle=$_GET['showtitle'] ?? null;
+$title=$_GET['title'] ?? null;
+$showgenre=$_GET['showgenre'] ?? null;
+$genre=$_GET['genre'] ?? null;
+$showrating=$_GET['showrating'] ?? null;
+$rating=$_GET['rating'] ?? null;
+$playtp=$_GET['playtp'] ?? null;
 #Um Album zu bearbeiten
-$CDid=$_GET['CDid'];
+$CDid=$_GET['CDid'] ?? null;
+$showlang = $lang = $showyear = $yearfrom = $yearto = $showbpm = $bpmfrom = '';
+$bpmto = $showsource = $source = $showcreated = $created = $showmodified = $modified = '';
 
 function show_selform($showartist, $artist, $showtitle, $title, $showgenre, $genre,
 			 $showlang, $lang, $showyear, $yearfrom, $yearto, $showrating, $rating,
@@ -51,21 +53,21 @@ function show_selform($showartist, $artist, $showtitle, $title, $showgenre, $gen
 
 <tr>
 <td class="selform"><input type="checkbox" name="showartist"
-  <?php if (strcmp($showartist, "on")==0){ ?>checked <?php } ?>></td>
+  <?php if (strcmp(gd_str($showartist), "on")==0){ ?>checked <?php } ?>></td>
 <td class="selformtit"><b>Artist</b> </td>
 <td class="selform"> <input type="text" name="artist" value="<?php echo $artist ?>" size="20" maxlength="200">
 </td></tr>
 
 <tr>
 <td class="selform"><input type="checkbox" name="showtitle"
-  <?php if (strcmp($showtitle, "on")==0){ ?>checked <?php }?>></td>
+  <?php if (strcmp(gd_str($showtitle), "on")==0){ ?>checked <?php }?>></td>
 <td class="selformtit"><b>Title</b></td>
 <td class="selform"> <input type="text" name="title"  value="<?php echo $title  ?>" size="20" maxlength="200">
 </td></tr>
 
 <tr>
 <td class="selform"><input type="checkbox" name="showgenre"
-  <?php if (strcmp($showgenre, "on")==0){ ?>checked <?php }?>></td>
+  <?php if (strcmp(gd_str($showgenre), "on")==0){ ?>checked <?php }?>></td>
 <td class="selformtit"><b>Genre</b></td>
 <td class="selform">
 <select name="genre"><?php print_genre_options($genre); ?></select>
@@ -73,7 +75,7 @@ function show_selform($showartist, $artist, $showtitle, $title, $showgenre, $gen
 
 <tr>
 <td class="selform"><input type="checkbox" name="showrating"
-  <?php if (strcmp($showrating, "on")==0){ ?>checked <?php }?>></td>
+  <?php if (strcmp(gd_str($showrating), "on")==0){ ?>checked <?php }?>></td>
 <td class="selformtit"><b>Rating</b></td>
 <td class="selform">
 <select name="rating"><?php print_rating_options($rating); ?></select>
@@ -118,21 +120,21 @@ $title = str_replace("'","&#39;",$title);
   if (isset($_GET['CDid']))
   	{
 #  	print "$CDid";
-#	if (strlen($rating)==0){$rating=0;}
-#  	$recset = mysql_db_query ("GiantDisc", "SELECT * FROM tracks WHERE artist LIKE '%$artist%' AND title LIKE '%".$title."%' AND (genre1 LIKE '".$genre."%' OR genre2 LIKE '".$genre."%') AND rating>=".$rating." AND sourceid =".$CDid." ");
+#	if (strlen(gd_str($rating))==0){$rating=0;}
+#  	$recset = mysqli_query($link, "SELECT * FROM tracks WHERE artist LIKE '%$artist%' AND title LIKE '%".$title."%' AND (genre1 LIKE '".$genre."%' OR genre2 LIKE '".$genre."%') AND rating>=".$rating." AND sourceid =".$CDid." ");
   	$recset = mysqli_query ( $link, "SELECT * FROM tracks WHERE artist LIKE '%$artist%' AND title LIKE '%".$title."%' AND sourceid LIKE '%$CDid%' ");
 
 	  }
   else
   	{
-	  if (strlen($rating)==0){$rating=0;}
+	  if (strlen(gd_str($rating))==0){$rating=0;}
   	$recset = mysqli_query ( $link, "SELECT * FROM tracks WHERE artist LIKE '%$artist%' AND title LIKE '%".$title."%' AND (genre1 LIKE '".$genre."%' OR genre2 LIKE '".$genre."%') AND rating>=".$rating." ");
 	  }	
 
-  print("<p><small><b>".mysqli_affected_rows( $link )." machting tracks</b></small></p>");
+  print("<p><small><b>".gd_affected($link)." machting tracks</b></small></p>");
   print("<table border=\"0\" cellspacing=\"0\">\n");
   $evenln = 1;
-  while($row = mysqli_fetch_array($recset)) {
+  while($row = gd_fetch_array($recset)) {
     if ($evenln){
       print "<tr class=\"lneven\">";
 	}
@@ -143,15 +145,15 @@ $title = str_replace("'","&#39;",$title);
 	else                       { $yearstr = $row["year"];}
     $evenln = 1-$evenln; #toggle $evenln
 
-    if (strcmp($playtp, "dl")==0){$mp3path = full_mp3_fname($row["mp3file"]);}
+    if (strcmp(gd_str($playtp), "dl")==0){$mp3path = full_mp3_fname($row["mp3file"]);}
 
-    if (strcmp($showartist, "on")==0){
+    if (strcmp(gd_str($showartist), "on")==0){
       print "<td class=\"trklst\">&nbsp;".$row["artist"]." </td>";
 	}
-    if (strcmp($showtitle, "on")==0){
+    if (strcmp(gd_str($showtitle), "on")==0){
 	  print "<td class=\"trklst\">&nbsp;".$row["title"]." </td>";
 	}
-    if (strcmp($showgenre, "on")==0){
+    if (strcmp(gd_str($showgenre), "on")==0){
 	  print "<td class=\"trklst\">&nbsp;";
       if (strlen($row["genre1"])>0){
 	    print_genre_string($row["genre1"]);
@@ -163,7 +165,7 @@ $title = str_replace("'","&#39;",$title);
 	  }
 	  print "</td>";
 	}
-    if (strcmp($showrating, "on")==0){
+    if (strcmp(gd_str($showrating), "on")==0){
 	  print "<td class=\"trklst\">&nbsp;";
       print_rating_string($row["rating"]);
 	  print "</td>";
@@ -176,12 +178,12 @@ $title = str_replace("'","&#39;",$title);
 		   		.$row["id"]."\"><img border=\"0\" src=\"img/edit-c.gif\" alt=\"Edit\" title=\"$output149\"></a></td>";
       # Download mp3
 	  # types: playtp = dl, rd, df, dl or dr
-#      if (strcmp($playtp, "dl")==0){
+#      if (strcmp(gd_str($playtp), "dl")==0){
 #	    print "<td class=\"trklst\">&nbsp;<a href=\"".$mp3path."\">"
 #		     ."<img border=\"0\" src=\"img/play-c.gif\"></a></td>";
 #	  }
 #      else{ # all other playtypes handled by "gdtrid2mp3.php"
-      $httphost = $_SERVER["HTTP_HOST"];
+      $httphost = $_SERVER["HTTP_HOST"] ?? null;
 	    print "<td class=\"trklst\">&nbsp;<a href=\"http://";
       print "$httphost/music/01/";
 			print $row["mp3file"]."\">"."<img border=\"0\" src=\"img/play-c.gif\" alt=\"Download\" title=\"$output080\"></a></td>";
@@ -191,7 +193,7 @@ $title = str_replace("'","&#39;",$title);
   print("</table>\n");
 /*
 */
-  mysqli_free_result($recset);
+  gd_free($recset);
   mysqli_close( $link );
 }
 ?>

@@ -12,6 +12,16 @@
  */
  
 include "control_web.inc";
+$link = mysqli_connect(MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB);
+$schritt = $_GET['schritt'] ?? '';
+$Folder = $_GET['Folder'] ?? '';
+$album = $_GET['album'] ?? '';
+$genre1 = $_GET['genre1'] ?? '';
+$genre2 = $_GET['genre2'] ?? '';
+$year = $_GET['year'] ?? '';
+$lang = $_GET['lang'] ?? '';
+$rating = $_GET['rating'] ?? '';
+$bpm = $_GET['bpm'] ?? '';
 
 
 print_header ("record", "", "$cgi_dir", "$host", "$requ");
@@ -65,15 +75,15 @@ $modified = date("Y-m-d");
 $anfrage = "INSERT INTO album ( artist, title, cddbid, coverimg, covertxt, modified, genre )
 								VALUES ( '$artist', '$album', '$cddbid', NULL, NULL,
 										'$modified', '$genre1')";
-$ergebnis = mysql_db_query("GiantDisc", $anfrage );
+$ergebnis = mysqli_query($link, $anfrage );
 
 if ( ! $ergebnis )
-	die ("Insert ist fehlgeschlagen: ".mysql_error());
+	die ("Insert ist fehlgeschlagen: ".mysqli_error($link));
 
 
 # Track's in Datenbank einfügen
-$type = $type - 1;
-$source = $source - 1;
+$type = (int)$type - 1;
+$source = (int)$source - 1;
 $tracknb = 1;
 $CDid = $cddbid;
 $cdir = @dir($Folder);
@@ -87,19 +97,20 @@ while ($entry = $cdir->read()) {
 		$ausgabe = implode("",$reihe);
 		$reihe[0] = "$htdocs/music/01/trxx";
 		$reihe[1] = $cddbid;
-		if (strstr($ausgabe, "mp3"))
+		if (strstr(gd_str($ausgabe), "mp3"))
 		$reihe[2] = ".mp3";
-		if (strstr($ausgabe, "ogg"))
+		if (strstr(gd_str($ausgabe), "ogg"))
 		$reihe[2] = ".ogg";
-		if (strstr($ausgabe, "flac"))
+		if (strstr(gd_str($ausgabe), "flac"))
 		$reihe[2] = ".flac";
    
    
-		if (strstr($ausgabe, "mp3"))
+		$filetype = '';
+		if (strstr(gd_str($ausgabe), "mp3"))
 			$filetype = "mp3";
-		if (strstr($ausgabe, "ogg"))
+		if (strstr(gd_str($ausgabe), "ogg"))
 			$filetype = "ogg";
-		if (strstr($ausgabe, "flac"))
+		if (strstr(gd_str($ausgabe), "flac"))
 			$filetype = "flac";
 			
 		$anfrage = "INSERT INTO tracks
@@ -109,10 +120,10 @@ while ($entry = $cdir->read()) {
 									VALUES ( '$artist', '$entry', '$genre1', '$genre2', '$year', '$lang', '$type',
 											'$rating', '0', '$source', '$CDid', '$tracknb', 'trxx$cddbid.$filetype', '0', '0',
 											 '0', '0', '$bpm', NULL, 'mp3', '$modified', '$modified', NULL, NULL)";
-		$ergebnis = mysql_query( $anfrage );
+		$ergebnis = mysqli_query($link,  $anfrage );
 
 		if ( ! $ergebnis )
-			die ("Insert ist fehlgeschlagen: ".mysql_error());
+			die ("Insert ist fehlgeschlagen: ".mysqli_error($link));
 
 	
 		$sourceid = implode("",$reihe);
@@ -122,8 +133,9 @@ while ($entry = $cdir->read()) {
 		$tracknb++;
 		$cddbid++;
 
-		$laenge = strlen($cddbid);
+		$laenge = strlen(gd_str($cddbid));
 		$soll = 8 - $laenge;
+		$letter = array();
 		$y = 0;
 		while ($y < $soll)
 			{
@@ -133,7 +145,7 @@ while ($entry = $cdir->read()) {
 		$x = 0;
 		while ($x < $laenge)
 			{
-			$letter[$y] = substr($cddbid, $x, 1);
+			$letter[$y] = substr(gd_str($cddbid), $x, 1);
 			$x++;
 			$y++;
 			}
@@ -141,7 +153,7 @@ while ($entry = $cdir->read()) {
 	}
 }
 $cdir->close;
-#mysql_close( $link );
+#mysqli_close($link);
 
 $artist = str_replace(" ", "+", $artist);
 print $artist;

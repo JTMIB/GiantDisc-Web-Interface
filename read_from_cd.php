@@ -12,17 +12,20 @@
  */
  
 include "control_web.inc";
+ini_set('pcre.jit', 0);
 require_once('getid3/getid3.php');
 require_once('getid3/write.php');
 
 ## Variablen aus Browser-Zeile
-$schritt=$_GET['schritt'];
-if ($schritt == 3)
-  {
-  $cddbid=$_GET['cddbid'];
-  $anz_track=$_GET['anz_track'];
-  $lfn_track=$_GET['lfn_track'];
-  }
+$schritt=$_GET['schritt'] ?? null;
+$cddbid=$_GET['cddbid'] ?? null;
+$anz_track=$_GET['anz_track'] ?? null;
+$lfn_track=$_GET['lfn_track'] ?? null;
+$sourceid=$_GET['sourceid'] ?? null;
+$artist = $_GET['artist'] ?? '';
+$title = $_GET['title'] ?? '';
+
+
 
 
 #$host = getenv(HTTP_HOST);
@@ -45,7 +48,7 @@ while (is_string( $wort ) )
 	}
 
 
-#  $link =  mysql_connect( MYSQL_HOST, MYSQL_USER, MYSQL_PASS );
+#  $link =  mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
   $link =  mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
   if ( ! $link )
       die( "Keine Verbindung zu MySQL" );
@@ -55,24 +58,24 @@ while (is_string( $wort ) )
 if ($schritt < 1)
 	{
 
-#	$ergebnis = mysql_db_query( "GiantDisc", "DROP TABLE album_temp, tracks_temp" );
+#	$ergebnis = mysqli_query($link, "DROP TABLE album_temp, tracks_temp" );
 #	$ergebnis = mysqli_query( $link, "DROP TABLE album_temp, tracks_temp" );
    $result = mysqli_query( $link, "SHOW TABLES LIKE 'tracks_temp'");
-      if (mysqli_num_rows($result) > 0) {
+      if (gd_num_rows($result) > 0) {
 #        echo "Tabelle ist da.<br>";
         $ergebnis = mysqli_query( $link, "DROP TABLE tracks_temp" );
       } else {
 #        echo "Tabelle ist nicht da.<br>";
       }
    $result = mysqli_query( $link, "SHOW TABLES LIKE 'album_temp'");
-      if (mysqli_num_rows($result) > 0) {
+      if (gd_num_rows($result) > 0) {
 #        echo "Tabelle ist da.<br>";
         $ergebnis = mysqli_query($link, "DROP TABLE album_temp" );
       } else {
 #        echo "Tabelle ist nicht da.<br>";
       }	
 	
-#	mysql_close( $link );
+#	mysqli_close($link);
 	}
 if ($schritt == 4)
 #	print_head ("aufnahme", "$cgi_dir", "$host", "$requ");
@@ -141,8 +144,8 @@ switch ($schritt)
 case 1:
 
 ## Variablen aus Browser-Zeile
-$sourceid=$_GET['sourceid'];
-$anz_track=$_GET['anz_track'];
+$sourceid=$_GET['sourceid'] ?? null;
+$anz_track=$_GET['anz_track'] ?? null;
 
 if ($sourceid == "noaudiodiskfound" or $anz_track == "0")
 	{
@@ -151,18 +154,18 @@ if ($sourceid == "noaudiodiskfound" or $anz_track == "0")
 else
 	{
 	# Kompatibel machen
-	$a = strlen($sourceid);
+	$a = strlen(gd_str($sourceid));
 	$a = $a - 8;
 	$sourceid = substr($sourceid,$a);
 
 	# Wurde diese CD bereits eingelesen?
   
   
-	#$ergebnis = mysql_db_query( "GiantDisc", "SELECT cddbid FROM album WHERE cddbid LIKE '$sourceid'" );
+	#$ergebnis = mysqli_query($link, "SELECT cddbid FROM album WHERE cddbid LIKE '$sourceid'" );
 	$ergebnis = mysqli_query( $link, "SELECT artist, title, coverimg, cddbid FROM album WHERE cddbid LIKE '$sourceid'" );
-	$anz_album = mysqli_num_rows($ergebnis);
+	$anz_album = gd_num_rows($ergebnis);
 
-#	mysql_close( $link );
+#	mysqli_close($link);
 	
 
 if ($anz_album != 0)
@@ -182,7 +185,7 @@ else
 	{
 	#temporär eine Album-Tabelle und eine Track-Tabelle erzeugen
 
-#$ergebnis = mysql_db_query( "GiantDisc", "SELECT cddbid FROM album_temp" );
+#$ergebnis = mysqli_query($link, "SELECT cddbid FROM album_temp" );
 $ergebnis = mysqli_query( $link, "SHOW TABLES LIKE 'album_temp'" );
 #if ( ! $ergebnis )
 if ( $ergebnis )
@@ -190,14 +193,14 @@ if ( $ergebnis )
 	#prüfen ob track_temp existiert
 	# hier
    $result = mysqli_query( $link, "SHOW TABLES LIKE 'tracks_temp'");
-      if (mysqli_num_rows($result) > 0) {
+      if (gd_num_rows($result) > 0) {
 #        echo "Tabelle ist da.<br>";
       } else {
 #        echo "Tabelle ist nicht da.<br>";
         track_temp();
       }
    $result = mysqli_query( $link, "SHOW TABLES LIKE 'album_temp'");
-      if (mysqli_num_rows($result) > 0) {
+      if (gd_num_rows($result) > 0) {
 #        echo "Tabelle ist da.<br>";
           $var_album_temp = 1;
       } else {
@@ -224,9 +227,9 @@ if ($var_album_temp == 0)
 	$x = 1;
 	while ($x <= $anz_track)
 		{
-#		$ergebnis = mysql_db_query( "GiantDisc", "INSERT INTO tracks_temp (artist, title, composer, genre1, genre2, year, lang, type, rating, length, source, sourceid, tracknb, mp3file, quality, voladjust, lengthfrm, startfrm, bpm, lyrics, bitrate, created, modified, backup)
+#		$ergebnis = mysqli_query($link, "INSERT INTO tracks_temp (artist, title, composer, genre1, genre2, year, lang, type, rating, length, source, sourceid, tracknb, mp3file, quality, voladjust, lengthfrm, startfrm, bpm, lyrics, bitrate, created, modified, backup)
 #							values('aritst', 'track$x', '', '', '', 'NULL', '', '1', '1', '0', '0', '$sourceid', '$x', 'tr0x$sourceid-$x.$prefc', '', '', '', '', '', 'NULL', '', '$modified', '$modified', 'NULL')" );
-#		$ergebnis = mysql_db_query( "GiantDisc", "INSERT INTO tracks_temp (artist, title, type, rating, length, source, sourceid, tracknb, mp3file, lyrics, created, modified)
+#		$ergebnis = mysqli_query($link, "INSERT INTO tracks_temp (artist, title, type, rating, length, source, sourceid, tracknb, mp3file, lyrics, created, modified)
 #							values('aritst', 'track$x', '1', '1', '0', '0', '$sourceid', '$x', 'tr0x$sourceid-$x.$prefc', 'NULL', '$modified', '$modified')" );
 		$ergebnis = mysqli_query( $link, "INSERT INTO tracks_temp (artist, title, type, rating, length, source, sourceid, tracknb, mp3file, lyrics, created, modified)
 							values('aritst', 'track$x', '1', '1', '0', '0', '$sourceid', '$x', 'tr0x$sourceid-$x.$prefc', 'NULL', '$modified', '$modified')" );
@@ -240,7 +243,7 @@ if ($var_album_temp == 0)
   $ergebnis = mysqli_query( $link, "UPDATE tracks_temp SET moreinfo = NULL WHERE moreinfo IS NOT NULL");
   $ergebnis = mysqli_query( $link, "UPDATE tracks_temp SET backup = NULL WHERE backup IS NOT NULL");
 
-#mysql_close( $link );
+#mysqli_close($link);
 	}
 	
 	read_cd_album("create");
@@ -454,8 +457,8 @@ break;
 case 2:
 
 ## Variablen aus Browser-Zeile
-$sourceid=$_GET['sourceid'];
-$anz_track=$_GET['anz_track'];
+$sourceid=$_GET['sourceid'] ?? null;
+$anz_track=$_GET['anz_track'] ?? null;
 
 track_temp();
 album_temp();
@@ -469,11 +472,11 @@ for ( $a = 1; $a <= $anz_track; $a++)
 	{
 #	print "<p>$a</p>";
 	$ergebnis = mysqli_query( $link , "SELECT  mp3file FROM tracks_temp WHERE  tracknb = '$a'" );
-	while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+	while ( $datensatz = gd_fetch_row($ergebnis) )
      {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		{
-		$b = strlen($feld);
+		$b = strlen(gd_str($feld));
 		if (strstr( $feld, ".flac"))
 			$b--;				# bei flac einen mehr abziehen.
 		if (strstr( $feld, ".opus"))
@@ -693,30 +696,30 @@ break;
 case 3:
 
 ## Variablen aus Browser-Zeile
-$artist=$_GET['artist'];
-$album=$_GET['album'];
-$title=$_GET['title'];
-$composer=$_GET['composer'];
-$genre1=$_GET['genre1'];
-$genre2=$_GET['genre2'];
-$year=$_GET['year'];
-$bpm=$_GET['bpm'];
-$lang=$_GET['lang'];
-$type=$_GET['type'];
-$rating=$_GET['rating'];
-$source=$_GET['source'];
-$def_artist=$_GET['def_artist'];
-$def_years=$_GET['def_years'];
-$bitrate=$_GET['bitrate'];
-$def_composer=$_GET['def_composer'];
-$def_genres=$_GET['def_genres'];
-$def_type=$_GET['def_type'];
-$def_lang=$_GET['def_lang'];
-$def_rating=$_GET['def_rating'];
-$def_source=$_GET['def_source'];
-$cddbid=$_GET['cddbid'];
-$anz_track=$_GET['anz_track'];
-$lfn_track=$_GET['lfn_track'];
+$artist=$_GET['artist'] ?? null;
+$album=$_GET['album'] ?? null;
+$title=$_GET['title'] ?? null;
+$composer=$_GET['composer'] ?? null;
+$genre1=$_GET['genre1'] ?? null;
+$genre2=$_GET['genre2'] ?? null;
+$year=$_GET['year'] ?? null;
+$bpm=$_GET['bpm'] ?? null;
+$lang=$_GET['lang'] ?? null;
+$type=$_GET['type'] ?? null;
+$rating=$_GET['rating'] ?? null;
+$source=$_GET['source'] ?? null;
+$def_artist=$_GET['def_artist'] ?? null;
+$def_years=$_GET['def_years'] ?? null;
+$bitrate=$_GET['bitrate'] ?? null;
+$def_composer=$_GET['def_composer'] ?? null;
+$def_genres=$_GET['def_genres'] ?? null;
+$def_type=$_GET['def_type'] ?? null;
+$def_lang=$_GET['def_lang'] ?? null;
+$def_rating=$_GET['def_rating'] ?? null;
+$def_source=$_GET['def_source'] ?? null;
+$cddbid=$_GET['cddbid'] ?? null;
+$anz_track=$_GET['anz_track'] ?? null;
+$lfn_track=$_GET['lfn_track'] ?? null;
 
 #print "<p>$artist";
 #print "</p>";
@@ -911,7 +914,7 @@ if ($lfn_track > $anz_track)
 	{
 
 	$ergebnis = mysqli_query( $link , "SELECT  artist,  title FROM tracks_temp" );
-	$anz_felder = mysqli_num_fields( $ergebnis );
+	$anz_felder = gd_num_fields($ergebnis);
 	print "<p class=plformtit>$output030</p><hr>";
 	$a = 0;
 	$b = 1;
@@ -920,12 +923,12 @@ if ($lfn_track > $anz_track)
 touch ("$tempdir/ripit.sh");
 #$dateiname = "/srv/www/htdocs/music/00/ripit.sh";
 $dateiname = "$tempdir/ripit.sh";
-$fp = fopen( $dateiname, 'w');
+$fp = @fopen( $dateiname, 'w');
 fwrite( $fp, "#\n");
 
-while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+while ( $datensatz = gd_fetch_row($ergebnis) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		  {
 		  if ( $a == 0 )
 				{
@@ -958,10 +961,10 @@ while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
     }
 
 $ergebnis = mysqli_query( $link , "SELECT bitrate FROM tracks_temp where tracknb = 1" );
-$anz_felder = mysqli_num_fields( $ergebnis );
-while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+$anz_felder = gd_num_fields($ergebnis);
+while ( $datensatz = gd_fetch_row($ergebnis) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		{
 		if ($prefc == "ogg")
 			$bitrate = substr($feld,4);
@@ -975,26 +978,26 @@ while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
 			$bitrate = substr($feld,4);        	
 		}
 	}
-mysqli_free_result($ergebnis);
+gd_free($ergebnis);
 	
 $ergebnis = mysqli_query( $link , "SELECT title FROM album_temp" );
-$anz_felder = mysqli_num_fields( $ergebnis );
-while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+$anz_felder = gd_num_fields($ergebnis);
+while ( $datensatz = gd_fetch_row($ergebnis) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		{
 		$album = $feld;
 		}
 	}
-mysqli_free_result($ergebnis);
+gd_free($ergebnis);
 
 $ergebnis = mysqli_query( $link , "SELECT artist, year, title FROM tracks_temp" );
-$anz_felder = mysqli_num_fields( $ergebnis );
+$anz_felder = gd_num_fields($ergebnis);
 $a = 0;
 $b = 1;
-while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+while ( $datensatz = gd_fetch_row($ergebnis) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		  {
 		  $a = $a + 1;
 		  
@@ -1146,7 +1149,7 @@ while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
 			}
 		}
     }
-mysqli_free_result($ergebnis);
+gd_free($ergebnis);
 fclose( $fp );	
 	}
 else
@@ -1198,10 +1201,10 @@ break;
 case 4:
 #temporaere Album-Tabelle und Track-Tabelle kopieren/updaten
 $ergebnis = mysqli_query( $link , "SELECT cddbid FROM album_temp" );
-$anz_felder = mysqli_num_fields( $ergebnis );
-while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+$anz_felder = gd_num_fields($ergebnis);
+while ( $datensatz = gd_fetch_row($ergebnis) )
 	{
-	foreach ( $datensatz as $feld )
+	foreach (gd_arr($datensatz) as $feld )
 		{
 		print "$feld";
 		$sourceid = $feld;
@@ -1209,7 +1212,7 @@ while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
 	}
 	
 $ergebnis = mysqli_query( $link , "SELECT cddbid FROM album WHERE cddbid LIKE '$sourceid'" );
-$anz_reihen = mysqli_num_rows( $ergebnis );
+$anz_reihen = gd_num_rows($ergebnis);
 
 #print "<br>";
 #print $anz_reihen;
@@ -1236,7 +1239,7 @@ else
 	{
 # update tracks
 	$ergebnis = mysqli_query( $link , "SELECT * FROM tracks_temp" );
-	$anz_track = mysqli_num_rows( $ergebnis );
+	$anz_track = gd_num_rows($ergebnis);
 	
 	$a = 1;
 	while ( $anz_track >= $a)
@@ -1246,9 +1249,9 @@ else
 	 FROM tracks_temp WHERE tracknb = $a" );
 	 
 	$b = 0; 
-	while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+	while ( $datensatz = gd_fetch_row($ergebnis) )
 		{
-		foreach ( $datensatz as $feld )
+		foreach (gd_arr($datensatz) as $feld )
 			{
 			$b++;
 			switch ($b)
@@ -1364,9 +1367,9 @@ $ergebnis = mysqli_query ( $link , "UPDATE tracks SET "
 	$b = 0; 
 	$ergebnis = mysqli_query( $link , "SELECT artist, title, genre 
 		FROM album_temp" );
-	while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+	while ( $datensatz = gd_fetch_row($ergebnis) )
 		{
-		foreach ( $datensatz as $feld )
+		foreach (gd_arr($datensatz) as $feld )
 			{
 			$b++;
 			switch ($b)
@@ -1402,8 +1405,8 @@ $ergebnis = mysqli_query ( $link , "UPDATE album SET "
 							."WHERE cddbid = '$sourceid'");
 
 
-#exec("/var/www/html/music/00/ripit.sh > /dev/null &");
-exec("$htdocs/music/00/ripit.sh > /dev/null &");
+#@exec("/var/www/html/music/00/ripit.sh > /dev/null &");
+@exec("$htdocs/music/00/ripit.sh > /dev/null &");
 
 break;
 
@@ -1411,7 +1414,7 @@ break;
 case 5:
 
 $ergebnis = mysqli_query( $link , "SELECT  artist,  title FROM tracks_temp" );
-$anz_felder = mysqli_num_fields( $ergebnis );
+$anz_felder = gd_num_fields($ergebnis);
 print "<p class=plformtit>$output030</p><hr>";
 print "<table border=1>";
 print "<tr><td>$output031</td><td>$output032</td><td>$output033</td><td>$output034</td><td>$output035</td></tr>";
@@ -1419,7 +1422,8 @@ print "<tr><td>$output031</td><td>$output032</td><td>$output033</td><td>$output0
 # welche Datei wird eingelesen?
 #$dateiname = "/var/www/html/music/00/rip.txt";
 $dateiname = "$htdocs/music/00/rip.txt";
-$fp = fopen( $dateiname, "r" ) or die ("Konnte $dateiname nicht oeffnen");
+$c = 0;
+$fp = @fopen( $dateiname, "r" ) or die ("Konnte $dateiname nicht oeffnen");
 while ( ! feof( $fp))
 	{
 	$zeile = fgets($fp, 1024);
@@ -1441,9 +1445,10 @@ fclose( $fp );
 
 # welche Datei wird codiert?
 $f = 0;
+$d = 0;
 #$dateiname = "/var/www/html/music/00/rip.txt";
 $dateiname = "$htdocs/music/00/rip.txt";
-$fp = fopen( $dateiname, "r" ) or die ("Konnte $dateiname nicht ï¿½ffnen");
+$fp = @fopen( $dateiname, "r" ) or die ("Konnte $dateiname nicht ï¿½ffnen");
 while ( ! feof( $fp))
 	{
 	$zeile = fgets($fp, 1024);
@@ -1463,9 +1468,9 @@ fclose( $fp );
 	
 $a = 0;
 $b = 1;
-while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+while ( $datensatz = gd_fetch_row($ergebnis) )
    {
-   foreach ( $datensatz as $feld )
+   foreach (gd_arr($datensatz) as $feld )
 	  {
 	  if ( $a == 0 )
 			{
@@ -1508,7 +1513,7 @@ while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
 			}
 	  }
    }
-#mysql_close( $link );
+#mysqli_close($link);
 print "</table>";
 
 break;
@@ -1519,6 +1524,8 @@ case 6:
 #########################################
 # PHP-Version
 $PHPVersion = phpversion();
+$ver = array(0 => '', 1 => '', 2 => '');
+$phpver = false;
 $a = 0;
 $teil = strtok ( $PHPVersion, "." );
 while ($teil) {
@@ -1552,10 +1559,10 @@ if ( (int)$ver[2] >= 5 )
 if ($phpver == true AND $id3tag == "no")
 {
 $ergebnis = mysqli_query( $link , "SELECT title FROM album_temp" );
-$anz_felder = mysqli_num_fields( $ergebnis );
-while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+$anz_felder = gd_num_fields($ergebnis);
+while ( $datensatz = gd_fetch_row($ergebnis) )
   {
-  foreach ( $datensatz as $feld )
+  foreach (gd_arr($datensatz) as $feld )
     {
     $album = $feld;
     }
@@ -1566,9 +1573,9 @@ $ergebnis = mysqli_query( $link , "SELECT artist, title, year, tracknb, mp3file 
 $anz_reihen = mysqli_num_rows ( $ergebnis );
 #print "Es sind $anz_reihen Zeilen in der Tabelle.<br>";
 $a = 1;
-while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+while ( $datensatz = gd_fetch_row($ergebnis) )
   {
-  foreach ( $datensatz as $feld )
+  foreach (gd_arr($datensatz) as $feld )
   #$a = $a + 1;
   switch ($a)
     {
@@ -1605,7 +1612,7 @@ while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
 		$a = 1;
 
 # MP3 Tag schreiben
-if ( strstr($mp3file, ".mp3"))
+if ( strstr(gd_str($mp3file), ".mp3"))
   {
   $TaggingFormat = 'UTF-8';
   // Initialize getID3 engine
@@ -1657,7 +1664,7 @@ $album = str_replace("&#39;","'",$album);
   }
     }
 # OGG Tag/comment schreiben
-if ( strstr($mp3file, ".ogg"))
+if ( strstr(gd_str($mp3file), ".ogg"))
   {
   $TaggingFormat = 'UTF-8';
 
@@ -1701,7 +1708,7 @@ if ( strstr($mp3file, ".ogg"))
 	echo 'Failed to write tags!<br>'.implode('<br><br>', $tagwriter->errors);
   }
 # FLAC Tag/comment schreiben
-if ( strstr($mp3file, ".flac"))
+if ( strstr(gd_str($mp3file), ".flac"))
   {
   $TaggingFormat = 'UTF-8';
 

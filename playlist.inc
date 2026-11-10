@@ -18,19 +18,20 @@
 ### "append a title to a playlist"
 
 function p_append($id){
+$link = mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
 
 echo("<h1>Append Title to Playlist</h1><hr noshade>");
 
-$ergebnis = mysql_db_query( "GiantDisc", "SELECT artist, title FROM tracks where id=$id" );
-$anz_felder = mysql_num_fields( $ergebnis );
+$ergebnis = mysqli_query($link, "SELECT artist, title FROM tracks where id=$id" );
+$anz_felder = gd_num_fields($ergebnis);
 
 print "<FORM METHOD='GET' ACTION='newpl.php'>
 <table border='0' cellspacing='0'><tr class='lneven'><td class='trklst'>&nbsp;<small><B>Append</B></small>";
 
 $a = 0;
-while ( $datensatz = mysql_fetch_row( $ergebnis ) )
+while ( $datensatz = gd_fetch_row($ergebnis) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		  {
 			if ($a == 0)
 				{
@@ -52,20 +53,20 @@ print "&nbsp;&nbsp;<small><B>to one listed playlist or create a new one:</B></sm
 &nbsp;<INPUT TYPE='submit' VALUE='create'>
 &nbsp;&nbsp;&nbsp;</td>
 </tr></table></FORM><hr noshade>";
-mysql_free_result($ergebnis);
+gd_free($ergebnis);
 
 
 
 
-$ergebnis = mysql_db_query( "GiantDisc", "SELECT id, title FROM playlist" );
-$anz_felder = mysql_num_fields( $ergebnis );
+$ergebnis = mysqli_query($link, "SELECT id, title FROM playlist" );
+$anz_felder = gd_num_fields($ergebnis);
 
 echo("<table><tr><td>&nbsp;</td><td>&nbsp; &nbsp;</td><td><small><B>No.</B></small></td><td>&nbsp;</td><td><small><B>Playlistname</B></small></td></tr>");
 
 $a = 0;
-while ( $datensatz = mysql_fetch_row( $ergebnis ) )
+while ( $datensatz = gd_fetch_row($ergebnis) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		  {
 			if ($a == 0)
 				{
@@ -82,8 +83,8 @@ while ( $datensatz = mysql_fetch_row( $ergebnis ) )
 		  }
     }
 echo("</table>");
-mysql_free_result($ergebnis);
-#mysql_close( $link );
+gd_free($ergebnis);
+#mysqli_close($link);
 }
 
 #######################################################################################
@@ -91,6 +92,7 @@ mysql_free_result($ergebnis);
 ### insert a title into playlist
 
 function p_appendex($pl_id, $title, $id){
+$link = mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
 
 #$benutzer = "music";
 #$passwort = "music";
@@ -99,15 +101,15 @@ function p_appendex($pl_id, $title, $id){
 #if ( ! $link )
 #    die( "Keine Verbindung zu MySQL" );
 #mysql_select_db( $db, $link )
-#    or die ( "Konnte Datenbank \"$db\" nicht öffnen: ".mysql_error() );
+#    or die ( "Konnte Datenbank \"$db\" nicht öffnen: ".mysqli_error($link) );
 
-$ergebnis = mysql_db_query( "GiantDisc", "select tracknumber from playlistitem where playlist=$pl_id" );
+$ergebnis = mysqli_query($link, "select tracknumber from playlistitem where playlist=$pl_id" );
 
 $a=0;
 $b=0;
-while ( $datensatz = mysql_fetch_row( $ergebnis ) )
+while ( $datensatz = gd_fetch_row($ergebnis) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		  {
 			$a = $feld;
 			if ($a > $b)
@@ -116,13 +118,13 @@ while ( $datensatz = mysql_fetch_row( $ergebnis ) )
     }
 $b++;
 
-mysql_free_result($ergebnis);
+gd_free($ergebnis);
 
-$ergebnis = mysql_db_query( "GiantDisc", "insert into playlistitem (playlist, tracknumber, trackid)
+$ergebnis = mysqli_query($link, "insert into playlistitem (playlist, tracknumber, trackid)
 values ($pl_id, $b, $id)" );
 
 
-#mysql_close( $link );
+#mysqli_close($link);
 }
 
 ?>

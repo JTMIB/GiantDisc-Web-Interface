@@ -11,6 +11,8 @@
  * veröffentlicht, weitergeben und/oder modifizieren (Version 3 der Lizenz).
  */
  
+$link = mysqli_connect(MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB);
+$id = array();
 include "control_web.inc";
 
 
@@ -21,7 +23,7 @@ print "<h2>Set ID3-Tag from CD-Album</h2>";
 
 touch ("/home/music/00/idtag_set.sh");
 $dateiname = "/home/music/00/idtag_set.sh";
-$fp = fopen( $dateiname, 'w');
+$fp = @fopen( $dateiname, 'w');
 fwrite( $fp, "#\n");
 
 
@@ -29,7 +31,7 @@ print "<p> </p>";
 print "<table width=80%>";
 #######################################################################
 # einzelne Tracks
-$ergebnis = mysql_db_query( "GiantDisc",
+$ergebnis = mysqli_query($link,
 		"SELECT mp3file,
 				artist,
 				title,
@@ -38,7 +40,7 @@ $ergebnis = mysql_db_query( "GiantDisc",
 				mp3file
 				FROM tracks
 				WHERE mp3file LIKE 'trxx%.mp3' AND tracknb = '1'" );
-$anz_reihen = mysql_num_rows( $ergebnis );
+$anz_reihen = gd_num_rows($ergebnis);
 
 $a = 0;	# Spalte
 $b = 0;	
@@ -47,9 +49,9 @@ $evenln = 1;	# grau oder weiss
 
 
 
-while ( $datensatz = mysql_fetch_row( $ergebnis ) )
+while ( $datensatz = gd_fetch_row($ergebnis) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		{
 		$a++;
 		$b++;
@@ -87,6 +89,7 @@ while ( $datensatz = mysql_fetch_row( $ergebnis ) )
 			# Disk-ID
 			print "<td class=\"trklst\">$feld</td>";
 			# Album
+			$n = 0;
 			$m = $n + 1;
 			print "<td class=\"trklst\"> </td>";
 			break;
@@ -115,29 +118,29 @@ while ( $datensatz = mysql_fetch_row( $ergebnis ) )
 			}
 		}
 	}
-mysql_free_result($ergebnis);
+gd_free($ergebnis);
 # Ende - einzelne Tracks
 #######################################################################	
 
-$ergebnis = mysql_db_query( "GiantDisc", "SELECT * FROM album" );
-#$anz_felder = mysql_num_fields( $ergebnis );
-$anz_reihen = mysql_num_rows( $ergebnis );
-mysql_free_result($ergebnis);
+$ergebnis = mysqli_query($link, "SELECT * FROM album" );
+#$anz_felder = gd_num_fields($ergebnis);
+$anz_reihen = gd_num_rows($ergebnis);
+gd_free($ergebnis);
 #print "<p>$anz_reihen</p>";
 
 # CDID in ein Array kopieren
 $i = 0;
-$alben = mysql_db_query( "GiantDisc", "SELECT cddbid, title FROM album" );
-while ( $datasatz = mysql_fetch_row( $alben ) )
+$alben = mysqli_query($link, "SELECT cddbid, title FROM album" );
+while ( $datasatz = gd_fetch_row($alben) )
     {
-    foreach ( $datasatz as $field )
+    foreach (gd_arr($datasatz) as $field )
 		{
 		$id[$i] = $field;
 		$i++;
 #		print "<p>$field</p>";
 		}
 	}
-mysql_free_result($alben);
+gd_free($alben);
 # Ende - CDID in ein Array kopieren
 
 
@@ -146,7 +149,7 @@ while ( $n/2 != $anz_reihen)
 	{
 	#print "<p>$n</p>";
 # Abfrage Tracks
-$ergebnis = mysql_db_query( "GiantDisc",
+$ergebnis = mysqli_query($link,
 		"SELECT mp3file,
 				artist,
 				title,
@@ -157,7 +160,7 @@ $ergebnis = mysql_db_query( "GiantDisc",
 				WHERE sourceid = '$id[$n]' AND mp3file LIKE '%.mp3'" );
 #				WHERE mp3file LIKE '%.mp3'" );								
 
-#$anz_felder = mysql_num_fields( $ergebnis );
+#$anz_felder = gd_num_fields($ergebnis);
 $a = 0;	# Spalte
 $b = 0;	
 $c = 1;	# Datensatz
@@ -165,9 +168,9 @@ $evenln = 1;	# grau oder weiss
 
 
 
-while ( $datensatz = mysql_fetch_row( $ergebnis ) )
+while ( $datensatz = gd_fetch_row($ergebnis) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		{
 		$a++;
 		$b++;
@@ -233,7 +236,7 @@ while ( $datensatz = mysql_fetch_row( $ergebnis ) )
 			}
 		}
 	}
-mysql_free_result($ergebnis);
+gd_free($ergebnis);
 # Abfrage Tracks Ende
 	$n++;
 	$n++;

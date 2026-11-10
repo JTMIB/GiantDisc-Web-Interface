@@ -13,21 +13,22 @@
  
 include "control_web.inc";
 include "gdwebdef.php";
+$current = '';
+$sel = '';
 
 ## Variablen aus Browser-Zeile
-$backgroundcolor=$_GET['backgroundcolor'];
-
-$playtp = set_get_cookie($setplaytp, "playtp", "dl", $HTTP_COOKIE_VARS);
+$backgroundcolor=$_GET['backgroundcolor'] ?? null;
+$playtp = set_get_cookie($_GET['setplaytp'] ?? null, "playtp", "dl", $_COOKIE);
 
 # BODY aufspueren und background-color neu setzen
     if ( isset($backgroundcolor) ) {
 #      print "$backgroundcolor ist gesetzt<br>";
 
-      copy("gdweb.css","gdweb.tmp");      
+      @copy("gdweb.css","gdweb.tmp");      
       $zaehler=0;
-      $myfile = fopen("gdweb.css", "w") or die("Kann Datei nicht öffnen!");
+      $myfile = @fopen("gdweb.css", "w") or die("Kann Datei nicht öffnen! " . (error_get_last()['message'] ?? ''));
       $datei_lesen="gdweb.tmp";
-      $dh = fopen($datei_lesen, "r");
+      $dh = @fopen($datei_lesen, "r");
       while (!feof($dh)) {
         $zeile = fgets($dh);
 
@@ -92,13 +93,13 @@ function popUp1(wintype)
 
 <?php
 # bevorzugtes Format
-  $myfile = fopen("setting.inc", "r") or die("Kann Datei nicht öffnen!");
+  $myfile = @fopen("setting.inc", "r") or die("Kann Datei nicht öffnen! " . (error_get_last()['message'] ?? ''));
   while(!feof($myfile)) {
     $daten = fgets($myfile);
       if (strncmp($daten, '$prefc', 6) === 0) {
 #          print "$daten<br>";
 
-#          if(strstr($daten, "mp3") != false) { 
+#          if(strstr(gd_str($daten), "mp3") != false) { 
 #                                             echo 'MP3<br>';
 #                                             $prefc = "mp3";
 #                                             }
@@ -108,7 +109,7 @@ function popUp1(wintype)
   fclose($myfile);
 
 # Sprache - language
-  $myfile = fopen("setting.inc", "r") or die("Kann Datei nicht öffnen!");
+  $myfile = @fopen("setting.inc", "r") or die("Kann Datei nicht öffnen! " . (error_get_last()['message'] ?? ''));
   while(!feof($myfile)) {
     $daten = fgets($myfile);
       if (strncmp($daten, '$language', 9) === 0) {
@@ -119,7 +120,7 @@ function popUp1(wintype)
   fclose($myfile);
 
 # MP3-Bitrate-Qualität
-  $myfile = fopen("setting.inc", "r") or die("Kann Datei nicht öffnen!");
+  $myfile = @fopen("setting.inc", "r") or die("Kann Datei nicht öffnen! " . (error_get_last()['message'] ?? ''));
   while(!feof($myfile)) {
     $daten = fgets($myfile);
       if (strncmp($daten, '$mp3_Q', 6) === 0) {
@@ -130,7 +131,7 @@ function popUp1(wintype)
   fclose($myfile);
 
 # OGG-Bitrate-Qualität
-  $myfile = fopen("setting.inc", "r") or die("Kann Datei nicht öffnen!");
+  $myfile = @fopen("setting.inc", "r") or die("Kann Datei nicht öffnen! " . (error_get_last()['message'] ?? ''));
   while(!feof($myfile)) {
     $daten = fgets($myfile);
       if (strncmp($daten, '$ogg_Q', 6) === 0) {
@@ -141,7 +142,7 @@ function popUp1(wintype)
   fclose($myfile);
 
 # FLAC-Compression
-  $myfile = fopen("setting.inc", "r") or die("Kann Datei nicht öffnen!");
+  $myfile = @fopen("setting.inc", "r") or die("Kann Datei nicht öffnen! " . (error_get_last()['message'] ?? ''));
   while(!feof($myfile)) {
     $daten = fgets($myfile);
       if (strncmp($daten, '$flac_Q', 7) === 0) {
@@ -152,7 +153,7 @@ function popUp1(wintype)
   fclose($myfile);
 
 # OPUS-Bitrate
-  $myfile = fopen("setting.inc", "r") or die("Kann Datei nicht öffnen!");
+  $myfile = @fopen("setting.inc", "r") or die("Kann Datei nicht öffnen! " . (error_get_last()['message'] ?? ''));
   while(!feof($myfile)) {
     $daten = fgets($myfile);
       if (strncmp($daten, '$opus_Q', 7) === 0) {

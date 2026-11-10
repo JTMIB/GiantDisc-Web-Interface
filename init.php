@@ -12,23 +12,11 @@
  */
  
 include "control_web.inc";
-#include "gdwebdef.php";
-
-
-#
-# First part:
-#				Check whether every required parts of the webinterface
-#				are installed.
-#
 
 
 # mysql
-#$chk['mysqlaccess'] = @mysql_connect(MYSQL_HOST);
-#$chk['databaseaccess'] = @mysql_select_db(MYSQL_DB) && $chk['mysqlaccess'];
-#$chk['mysqlaccess'] = mysql_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS);
+$chk = array();
 $chk['mysqlaccess'] = mysqli_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS,MYSQL_DB);
-#$dblink = mysql_connect(MYSQL_HOST,MYSQL_USER,MYSQL_PASS);
-#$chk['databaseaccess'] = mysql_select_db(MYSQL_DB,$dblink) && $chk['mysqlaccess'];
 
 #########################################
 
@@ -45,6 +33,9 @@ $chk['mp3rw'] = is_dir($PATH_ABSOLUTE_mp3) && is_readable($PATH_ABSOLUTE_mp3) &&
 # PHP-Version
 
 $PHPVersion = phpversion();
+$ver = array(0 => '', 1 => '', 2 => '');
+$phpver = false;
+$ver = array(0 => '', 1 => '', 2 => '');
 $a = 0;
 $teil = strtok ( $PHPVersion, "." );
 while ($teil) {
@@ -90,9 +81,9 @@ if(ini_get("register_long_arrays") == "1")
 
 
 $uploadmaxfilesize = ini_get('upload_max_filesize');
-$uploadmaxfilesize = explode("=", $uploadmaxfilesize);
-$uploadmaxfilesize = $uploadmaxfilesize[0];
-$lang = strlen($uploadmaxfilesize);
+$uploadmaxfilesize = explode("=", gd_str($uploadmaxfilesize));
+$uploadmaxfilesize = $uploadmaxfilesize[0] ?? '';
+$lang = strlen(gd_str($uploadmaxfilesize));
 $lang = $lang - 1;
 $uploadmaxfilesize = substr($uploadmaxfilesize,0,3);
 $uploadmaxfilesize = (int)$uploadmaxfilesize;
@@ -103,9 +94,9 @@ else
 
 
 $postmaxsize = ini_get('post_max_size');
-$postmaxsize = explode("=", $postmaxsize);
-$postmaxsize = $postmaxsize[0];
-$lang = strlen($postmaxsize);
+$postmaxsize = explode("=", gd_str($postmaxsize));
+$postmaxsize = $postmaxsize[0] ?? '';
+$lang = strlen(gd_str($postmaxsize));
 $lang = $lang - 1;
 $postmaxsize = substr($postmaxsize,0,$lang);
 $postmaxsize = (int)$postmaxsize;
@@ -119,9 +110,9 @@ else
   }
 
 $maxexecutiontime = ini_get('max_execution_time');
-$maxexecutiontime = explode("=", $maxexecutiontime);
-$maxexecutiontime = $maxexecutiontime[0];
-$lang = strlen($maxexecutiontime);
+$maxexecutiontime = explode("=", gd_str($maxexecutiontime));
+$maxexecutiontime = $maxexecutiontime[0] ?? '';
+$lang = strlen(gd_str($maxexecutiontime));
 #$lang = $lang - 1;
 $maxexecutiontime = substr($maxexecutiontime,0,$lang);
 $maxexecutiontime = (int)$maxexecutiontime;
@@ -210,7 +201,7 @@ if ($bashplayer == "yes")
 #########################################
 
 	# check if there were errors
-	$a=false; foreach($chk as $e=>$value) {
+	$a=false; foreach (gd_arr($chk) as $e=>$value) {
 		if (!$value) { $a = true; break; }
 	}
 

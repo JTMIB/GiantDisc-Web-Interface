@@ -25,6 +25,7 @@
  
 include "control_web.inc";
 include "gdwebdef.php";
+ini_set('pcre.jit', 0);
 
   $link =  mysqli_connect( MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB );
   if ( ! $link )
@@ -32,7 +33,7 @@ include "gdwebdef.php";
 
 
 ## Variablen aus Browser-Zeile
-$cddbid=$_POST['cddbid'];
+$cddbid=$_POST['cddbid'] ?? null;
 
 
 print "<meta http-equiv=\"refresh\" content=\"5;URL=cover.php?cddbid=$cddbid\">";
@@ -70,6 +71,10 @@ $upload_verzeichnis = $tempdir;
 
 
 # Name für Upload-Element im Formular heisst 'datei'
+$datei      = $_FILES['datei']['name'] ?? null;
+$datei_type = $_FILES['datei']['type'] ?? null;
+$dateiname = '';
+$hochladen = '';
 if (isset($_FILES['datei']['name'])) {
     $dateiname = $_FILES['datei']['name'];
 # Dateinamen prüfen: Nur Buchstaben, Punkt, Unter- und Bindestrich erlaubt:
@@ -97,7 +102,7 @@ if(($datei_type != 'image/gif' && $datei) && ($datei_type != 'image/jpeg' && $da
 # WICHTIG: Prüfen, ob Datei schon existiert, um überschreiben zu verhindern!
 	if (file_exists("$upload_verzeichnis/$dateiname"))
 	{
-    echo "<p>Datei " . htmlspecialchars($dateiname) . " existiert schon!</p>";
+    echo "<p>Datei " . htmlspecialchars(gd_str($dateiname)) . " existiert schon!</p>";
 	$hochladen = "Fehler";
   }
 # Ist ein Fehler aufgetreten?
@@ -113,7 +118,7 @@ if ($hochladen == "Fehler")
     echo "$output105<br>";
 
     $recset = mysqli_query ($link, "SELECT mp3file FROM tracks WHERE sourceid = '$cddbid' AND tracknb = 1 ");
-    while($row = mysqli_fetch_object($recset))
+    while($row = gd_fetch_object($recset))
         {
         $mp3file = $row->mp3file;
         }    
@@ -121,15 +126,15 @@ print "$tempdir<br>";
 print "$dateiname<br>";
 print "$mp3file<br>";
 
-#    $lang = strlen($mp3file);
+#    $lang = strlen(gd_str($mp3file));
 #    $lang = $lang - 4;
 #    $new_img_name = substr($mp3file,0,$lang);
 
-    $teilung = explode(".", $mp3file);
+    $teilung = explode(".", gd_str($mp3file));
     $new_img_name=$teilung[0];
     
 print "$new_img_name<br>";
-    $extend = explode(".", $dateiname);
+    $extend = explode(".", gd_str($dateiname));
     $was = $extend[1];
     $new_tumb_name = $new_img_name."-t";
     $new_img_name = $new_img_name.".".$was;
@@ -170,7 +175,7 @@ ImageCopyResized($neuesBild,$altesBild,0,0,0,0,$neueBreite,$neueHoehe,$breite,$h
 ImagePNG($neuesBild,"$imagedir"."/"."$new_tumb_name".".png", 100);
 }
 
-unlink("/$upload_verzeichnis/$dateiname");
+@unlink("/$upload_verzeichnis/$dateiname");
 
   $ergebnis = mysqli_query( $link, "UPDATE album SET coverimg = '$new_img_name' WHERE cddbid = '$cddbid'");
 
@@ -190,7 +195,7 @@ unlink("/$upload_verzeichnis/$dateiname");
 	}    
 }
 
-  mysqli_free_result($recset);
+  gd_free($recset);
   mysqli_close( $link );
 
 

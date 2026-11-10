@@ -15,8 +15,7 @@ include "control_web.inc";
 include "gdwebdef.php";
 
 $host = getenv('HTTP_HOST');
-
-$playtp = set_get_cookie($setplaytp, "playtp", "dl", $HTTP_COOKIE_VARS);
+$playtp = set_get_cookie($_GET['setplaytp'] ?? null, "playtp", "dl", $_COOKIE);
 
 print_header ("settings", "", "$cgi_dir", "$char_set", $output135, $output136, $output137, $output138);
 
@@ -69,7 +68,7 @@ print "<h3>$output069</h3>
     {
     print "<hr>";
     print "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-    $meineIP = $_SERVER['SERVER_ADDR'];
+    $meineIP = $_SERVER['SERVER_ADDR'] ?? null;
     print "<a href=\"http://$meineIP:8080/shutdown\" target=\"neu\"><img src=\"img/power_off_button_quadrat.png\" height=\"75\" border=\"0\" title=\"$output163\"></a>";
     }
 

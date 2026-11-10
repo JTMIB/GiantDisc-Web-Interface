@@ -12,20 +12,21 @@
  */
  
 require "control_web.inc";
+ini_set('pcre.jit', 0);
 require_once('getid3/getid3.php');
 
 ## Variablen aus Browser-Zeile
-$dir=$_GET['dir'];
-$file=$_GET['file']; 
-$com=$_GET['com'];
-$uri=$_GET['uri'];
+$dir=$_GET['dir'] ?? null;
+$file=$_GET['file'] ?? null; 
+$com=$_GET['com'] ?? null;
+$uri=$_GET['uri'] ?? null;
 
 #print "$dir<br>";
 print "$file<br>";
 #print "$com<br>";
 #print "$uri<br>";
 
-if ( strstr($file, ".mp3"))
+if ( strstr(gd_str($file), ".mp3"))
   {
 #  echo "Working on file ".$file."<br>";
   $getID3 = new getID3;
@@ -44,21 +45,21 @@ if ( strstr($file, ".mp3"))
     print "$anz_time<br>";
     if ( $anz_time == 2)
       {
-      $einzeln = explode(':', $time);
+      $einzeln = explode(':', gd_str($time));
       $stunden = $einzeln[0];
       $minuten = $einzeln[1];
       $sekunde = $einzeln[2];      
       }
     if ( $anz_time == 1)
       {
-      $einzeln = explode(':', $time);
+      $einzeln = explode(':', gd_str($time));
       $stunden = 0;
       $minuten = $einzeln[0];
       $sekunde = $einzeln[1];      
       }    
     if ( $anz_time == 0)
       {
-#      $einzeln = explode(':', $time);
+#      $einzeln = explode(':', gd_str($time));
       $stunden = 0;
       $minuten = 0;
       $sekunde = $time;      
@@ -72,7 +73,7 @@ if ( strstr($file, ".mp3"))
 #    print "$length<br>";  
   }
 
-if ( strstr($file, ".ogg"))
+if ( strstr(gd_str($file), ".ogg"))
   {
   $getID3 = new getID3;
   $ThisFileInfo = $getID3->analyze("$dir/$file");
@@ -86,7 +87,7 @@ if ( strstr($file, ".ogg"))
   $bitrate =  round($ThisFileInfo['audio']['bitrate'] / 1000);
   $time = $ThisFileInfo['playtime_string'];
 
-    $laengetime=(strlen($time));
+    $laengetime=(strlen(gd_str($time)));
     if ( $laengetime >= 6)
       {
       $stunde = strtok( $time, ":");
@@ -102,7 +103,7 @@ if ( strstr($file, ".ogg"))
 #  print "$length<br>"; 
   }
 
-if ( strstr($file, ".flac"))
+if ( strstr(gd_str($file), ".flac"))
   {
   $getID3 = new getID3;
   $ThisFileInfo = $getID3->analyze("$dir/$file");
@@ -116,7 +117,7 @@ if ( strstr($file, ".flac"))
   $bitrate =  round($ThisFileInfo['audio']['bitrate'] / 1000);
   $time = $ThisFileInfo['playtime_string'];
 
-    $laengetime=(strlen($time));
+    $laengetime=(strlen(gd_str($time)));
     if ( $laengetime >= 6)
       {
       $stunde = strtok( $time, ":");

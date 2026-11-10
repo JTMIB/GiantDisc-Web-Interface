@@ -17,7 +17,7 @@ include "control_web.inc";
 print_header ("browse", "", "$cgi_dir", $char_set, $output135, $output136, $output137, $output138);
 
 ## Variablen aus Browser-Zeile
-$id=$_GET['id'];
+$id=$_GET['id'] ?? null;
 
 ###########################################################################
 ### append a title to a playlists

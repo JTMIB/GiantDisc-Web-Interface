@@ -14,21 +14,21 @@
 include "control_web.inc";
 
 ## Variablen aus Browser-Zeile
-$artist=$_POST['artist'];
-$title=$_POST['title'];
-$composer=$_POST['composer'];
-$genre1=$_POST['genre1'];
-$genre2=$_POST['genre2'];
-$year=$_POST['year'];
-$bpm=$_POST['bpm'];
-$lang=$_POST['lang'];
+$artist=$_POST['artist'] ?? null;
+$title=$_POST['title'] ?? null;
+$composer=$_POST['composer'] ?? null;
+$genre1=$_POST['genre1'] ?? null;
+$genre2=$_POST['genre2'] ?? null;
+$year=$_POST['year'] ?? null;
+$bpm=$_POST['bpm'] ?? null;
+$lang=$_POST['lang'] ?? null;
 
-$type=$_POST['type'];
-$rating=$_POST['rating'];
-$source=$_POST['source'];
+$type=$_POST['type'] ?? null;
+$rating=$_POST['rating'] ?? null;
+$source=$_POST['source'] ?? null;
 
-$schritt=$_POST['schritt'];
-$cddbid=$_POST['cddbid'];
+$schritt=$_POST['schritt'] ?? null;
+$cddbid=$_POST['cddbid'] ?? null;
 
   $link =  mysqli_connect( MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB );
   if ( ! $link )
@@ -99,13 +99,13 @@ $selected = 2;
 
   $recset = mysqli_query ( $link, "SELECT * FROM musictype ORDER BY id");
   print "<option value=\"\">&nbsp;</option>\n";
-  while($row = mysqli_fetch_array($recset)) {
+  while($row = gd_fetch_array($recset)) {
     print "<option value=\"".$row["id"]."\"";
     if ($row["id"] == $selected) {print(" selected");};
     print ">";
 	print $row["musictype"]."</option>\n";
   }
-#  mysql_close( $link );
+#  mysqli_close($link);
 
 print "</select></small>
 </td>
@@ -118,10 +118,10 @@ print "</select></small>
 $selected = 1;
   $recset = array("-", "0", "+", "++");
   print "<option value=\"\">&nbsp;</option>\n";
-  foreach ($recset as $key => $value) {
-#  while(list($key, $value) = each($recset)) {
+  foreach (gd_arr($recset) as $key => $value) {
+#  foreach (gd_arr($recset) as $key => $value) {
     print "<option value=\"".$key."\"";
-    if (strlen($selected)>0 && $key == $selected) {print(" selected");};
+    if (strlen(gd_str($selected))>0 && $key == $selected) {print(" selected");};
     print ">";
 	print $value."</option>\n";
   }
@@ -136,7 +136,7 @@ $selected = 1;
 
   $recset = mysqli_query ( $link, "SELECT * FROM source ORDER BY id");
   print "<option value=\"\">&nbsp;</option>\n";
-  while($row = mysqli_fetch_array($recset)) {
+  while($row = gd_fetch_array($recset)) {
     print "<option value=\"".$row["id"]."\"";
     if ($row["id"] == $selected) {print(" selected");};
     print ">";
@@ -159,23 +159,23 @@ print "</td></tr></table>";
 
 # letzte cddbid auslesen
 $ergebnis = mysqli_query ( $link, "SELECT mp3file FROM tracks WHERE mp3file LIKE 'trxx%'" );
-$anz_felder = mysqli_num_fields( $ergebnis );
-$anz_reihen = mysqli_num_rows( $ergebnis );
+$anz_felder = gd_num_fields($ergebnis);
+$anz_reihen = gd_num_rows($ergebnis);
 
-while ( $datensatz = mysqli_fetch_row( $ergebnis ) )
+while ( $datensatz = gd_fetch_row($ergebnis) )
     {
-    foreach ( $datensatz as $feld )
+    foreach (gd_arr($datensatz) as $feld )
 		  {
 		  }
     }
-#mysql_close( $link );
+#mysqli_close($link);
 
 # errechnen von naechster cddbid
 if ($anz_reihen == 0)
 	$feld = "trxx00000000.mp3";
-$feld = substr($feld, 4, 8);
+$feld = substr(gd_str($feld), 4, 8);
 $feld++;
-$lang = strlen($feld);
+$lang = strlen(gd_str($feld));
 $soll = 8 - $lang;
 $y = 0;
 while ($y < $soll)
@@ -211,7 +211,7 @@ if ($schritt = 2){
 
     
 #if ( $_FILES['uploaddatei']['name']  <> "" )
-if ( $_FILES['datei']['name']  <> "" )
+if ( ($_FILES['datei']['name'] ?? '') <> "" )
 {
     // Datei wurde durch HTML-Formular hochgeladen
     // und kann nun weiterverarbeitet werden
@@ -253,6 +253,8 @@ if ( $_FILES['datei']['name']  <> "" )
             $teile = explode(".", $_FILES['datei']['name']);
             $extention = '.'.$teile[1];     
 	          
+	          $bitrate = '';
+	          $dateiname = '';
 	          if ($extention == ".mp3")
 		          $bitrate = "mp3";
 	          if ($extention == ".ogg")
@@ -278,7 +280,7 @@ if ( $_FILES['datei']['name']  <> "" )
 		        print "$type<br>";
 		        print "$rating<br>";            
 		        #Korrektur
-		        $source = $source - 1;
+		        $source = (int)$source - 1;
 		        print "$source<br>";
 		        print "$sourceid<br>";
 		        print "TrackNb: $tracknb<br>";
@@ -304,7 +306,7 @@ if ( $_FILES['datei']['name']  <> "" )
             	$sourceid = "$upload_verzeichnis/". $_FILES['datei']['name'];
 	          	$ausgabe = "$PATH_ABSOLUTE_mp3/$mp3file";
 	          	copy ($sourceid, $ausgabe);
-            	unlink("$upload_verzeichnis/". $_FILES['datei']['name']);
+            	@unlink("$upload_verzeichnis/". $_FILES['datei']['name']);
             	
 print $_FILES['datei']['name'];
 print "<br>";

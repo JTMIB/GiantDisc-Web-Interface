@@ -18,9 +18,9 @@ include "control_web.inc";
       die( "Keine Verbindung zu MySQL" );
 
 ## Variablen aus Browser-Zeile
-$cddbid=$_GET['cddbid'];
-$evaluation=$_GET['evaluation'];
-$action=$_GET['action'];
+$cddbid=$_GET['cddbid'] ?? null;
+$evaluation=$_GET['evaluation'] ?? null;
+$action=$_GET['action'] ?? null;
 
 if($action == "set")
   {
@@ -40,7 +40,7 @@ if($action == "delete")
   $ergebnis = mysqli_query( $link, "DELETE FROM album_fav WHERE cddbid LIKE '%$cddbid%'");
   }
 
-  #mysql_free_result($ergebnis);
+  #gd_free($ergebnis);
   mysqli_close( $link );
 ?>
 <html>
