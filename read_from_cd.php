@@ -170,7 +170,16 @@ else
 
 if ($anz_album != 0)
 	{
-	print "<p>$output023 <b>$sourceid</b> $output024</p>";
+	$album_artist = '';
+	$album_title = '';
+	if ( $alb = gd_fetch_array($ergebnis) )
+		{
+		$album_artist = gd_str($alb["artist"] ?? '');
+		$album_title = gd_str($alb["title"] ?? '');
+		}
+	print "<p>$output023 <b>$sourceid</b> &nbsp;/&nbsp; ";
+	print "<b>$album_artist</b> &nbsp;-&nbsp; <i>$album_title</i> &nbsp; $output024</p>";
+
 	print "<p>$output025</p>";
 	print "<table align=right>";
 	print "<tr><td class=\"menuactive\"><a class=\"menuinactive\" href=\"index.php\">$output022</a></td>";
